@@ -1,7 +1,9 @@
-const { CREATED } = require("../core/success.response");
+const { CREATED, OK } = require("../core/success.response");
 const UserService = require("../service/User.service");
 
 class UserController {
+  // Get
+  // Create
   signUp = async (req, res, next) => {
     new CREATED({
       message: "Registered Success!",
@@ -9,6 +11,21 @@ class UserController {
       options: {
         limit: 10,
       },
+    }).send(res);
+  };
+
+  // Update
+  updateUserById = async (req, res, next) => {
+    new OK({
+      message: "Registered Success!",
+      metadata: await UserService.updateUserById(req.body),
+    }).send(res);
+  };
+  // Delete
+  deleteUserById = async (req, res, next) => {
+    new OK({
+      message: "Registered Success!",
+      metadata: await UserService.updateUserById(req.body.user_id),
     }).send(res);
   };
 }
