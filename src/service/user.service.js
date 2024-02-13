@@ -38,7 +38,7 @@ class UserService {
     return newUser;
   }
   // Update
-  static async updateUser({ _id, name, email, password }) {
+  static async updateUserById({ _id, name, email, password }) {
     const foundUser = await getUserById({ _id });
     if (!foundUser) {
       throw new BadRequestError("User not found");

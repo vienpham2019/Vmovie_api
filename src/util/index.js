@@ -1,7 +1,56 @@
 const getSelectData = (select = []) => {
   return Object.fromEntries(select.map((el) => [el, 1]));
 };
+const getUnSelectData = (select = []) => {
+  return Object.fromEntries(select.map((el) => [el, 0]));
+};
+
+const getInfoData = ({ fileds = [], object = {} }) => {
+  return _.pick(object, fileds);
+};
+
+const getSkip = ({ limit, page }) => {
+  const limitValue = +limit;
+  const pageValue = +page;
+
+  if (Number.isNaN(limitValue) || Number.isNaN(pageValue)) {
+    // Handle the case where the values are not valid numbers
+    // For example, throw an error or set default values
+    throw new Error("Invalid page or limit value");
+    // OR
+    // return a default skip value
+    // return 0;
+  }
+  return (pageValue - 1) * limitValue;
+};
+
+const getSortBy = (sortType) => {
+  return sortType === "ctime" ? { _id: -1 } : { _id: 1 };
+};
+
+const removeUndefinedNull = (obj) => {
+  for (const key in obj) {
+    if (obj[key] && typeof obj[key] === "object") {
+      obj[key] = removeUndefinedNull(obj[key]); // Recursively check nested objects
+      Object.keys(obj[key]).forEach((a) => {
+        obj[`${key}.${a}`] = obj[key][a];
+      });
+      delete obj[key];
+    } else if (obj[key] === undefined || obj[key] === null || obj[key] === "") {
+      delete obj[key]; // Delete keys with undefined or null values
+    }
+  }
+  return obj;
+};
+
+const removeDuplicatesInArray = (array) => [...new Set(array)];
 
 module.exports = {
   getSelectData,
+  getUnSelectData,
+  getInfoData,
+  getSkip,
+  getSortBy,
+  removeUndefinedNull,
+  removeDuplicatesInArray,
 };

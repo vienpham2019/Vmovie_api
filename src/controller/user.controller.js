@@ -18,7 +18,10 @@ class UserController {
   updateUserById = async (req, res, next) => {
     new OK({
       message: "Registered Success!",
-      metadata: await UserService.updateUserById(req.body),
+      metadata: await UserService.updateUserById({
+        _id: req.user._id,
+        ...req.body,
+      }),
     }).send(res);
   };
   // Delete
