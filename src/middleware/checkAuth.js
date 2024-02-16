@@ -1,7 +1,6 @@
-const JWT = require("jsonwebtoken");
-const { asyncHandler } = require("../helper/asyncHandler");
-const { AuthFailureError, NotFoundError } = require("../core/error.response");
-const { getKeyTokenByUserId } = require("../model/keyToken/keyToken.repo");
+"use strict";
+const { BadRequestError, AuthFailureError } = require("../core/error.response");
+const asyncHandler = require("../helper/asyncHandler");
 
 const HEADER = {
   API_KEY: "x-api-key",
@@ -10,22 +9,19 @@ const HEADER = {
   REFRESHTOKEN: "refreshtoken",
 };
 
-const createTokenPair = async (payload, publicKey, privateKey) => {
-  try {
-    // access token
-    const accessToken = await JWT.sign(payload, publicKey, {
-      expiresIn: "2 days",
-    });
-
-    // refresh token
-    const refreshToken = await JWT.sign(payload, privateKey, {
-      expiresIn: "7 days",
-    });
-
-    return { accessToken, refreshToken };
-  } catch (error) {
-    return error;
-  }
+const checkUserRole = (role) => {
+  return asyncHandler(async (req, res, next) => {
+    try {
+      const foundUser = await getUserById({ userId: req.user.userId });
+      const validUserRole = foundUser.user_roles.includes(role);
+      if (!validUserRole) {
+        throw new BadRequestError("Request denied");
+      }
+      return next();
+    } catch (error) {
+      throw error;
+    }
+  });
 };
 
 const authentication = asyncHandler(async (req, res, next) => {
@@ -79,7 +75,4 @@ const authentication = asyncHandler(async (req, res, next) => {
   }
 });
 
-module.exports = {
-  createTokenPair,
-  authentication,
-};
+module.exports = { checkUserRole, authentication };
