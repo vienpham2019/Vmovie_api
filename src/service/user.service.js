@@ -12,11 +12,14 @@ const {
   updateUserById,
   deleteUserById,
 } = require("../model/user/user.repo");
+const { validateEmail, validatePassword } = require("../util/validate");
 
 class UserService {
   // Get
   // Create
   static async createUser({ name, email, password }) {
+    validateEmail(email);
+    validatePassword(password);
     const existsEmail = await getUserByEmail({ email });
 
     if (existsEmail) {
@@ -39,6 +42,7 @@ class UserService {
   }
   // Update
   static async updateUserById({ _id, name, email, password }) {
+    if (email) validateEmail(email);
     const foundUser = await getUserById({ _id });
     if (!foundUser) {
       throw new BadRequestError("User not found");
@@ -49,6 +53,7 @@ class UserService {
     }
 
     if (password) {
+      validatePassword(password);
       password = await byscrypt.hash(password, 10);
     }
 

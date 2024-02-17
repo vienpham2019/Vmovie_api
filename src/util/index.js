@@ -31,6 +31,8 @@ const getSortBy = (sortType) => {
   return sortType === "ctime" ? { _id: -1 } : { _id: 1 };
 };
 
+const daysToMilliseconds = (days) => days * 24 * 60 * 60 * 1000;
+
 const createTokenCode = () => crypto.randomBytes(64).toString("hex");
 
 const removeUndefinedNull = (obj) => {
@@ -56,6 +58,7 @@ module.exports = {
   getInfoData,
   getSkip,
   getSortBy,
+  daysToMilliseconds,
   createTokenCode,
   removeUndefinedNull,
   removeDuplicatesInArray,

@@ -2,6 +2,7 @@
 
 const { Schema, model } = require("mongoose"); // Erase if already required
 const { UserRoleEnum } = require("./user.enum");
+const { BadRequestError } = require("../../core/error.response");
 
 const DOCUMENT_NAME = "User";
 const COLLECTION_NAME = "Users";

@@ -9,19 +9,19 @@ const getKeyTokenByUserId = async ({ userId }) => {
     .lean();
 };
 const getKeyTokenByRefreshToken = async ({ refreshToken }) => {
-  return await keyTokenModel.findOne({ refreshToken: refreshToken }).lean();
+  return await keyTokenModel.findOne({ refreshToken }).lean();
 };
 // Create
 const createKeyToken = async ({ userId, refreshToken }) => {
   const filter = { userId: new Types.ObjectId(userId) };
   const update = {
-    publicKey: createTokenCode(),
-    privateKey: createTokenCode(),
+    accessTokenSecret: createTokenCode(),
+    refreshTokenSecret: createTokenCode(),
     refreshTokensUsed: [],
-    refreshToken: refreshToken,
+    refreshToken,
   };
   const options = { upsert: true, new: true };
-  return await keytokenModel.findOneAndUpdate(filter, update, options);
+  return await keyTokenModel.findOneAndUpdate(filter, update, options);
 };
 // Update
 const updateRefreshToken = async ({ token, newRefreshToken }) => {
@@ -34,7 +34,7 @@ const updateRefreshToken = async ({ token, newRefreshToken }) => {
       refreshTokensUsed: token.refreshToken,
     },
   };
-  return await keytokenModel.updateMany(filter, update).lean();
+  return await keyTokenModel.updateMany(filter, update).lean();
 };
 // Delete
 

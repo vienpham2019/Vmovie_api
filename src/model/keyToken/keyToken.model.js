@@ -11,11 +11,11 @@ const keyTokenSchema = new Schema(
       required: true,
       ref: "User",
     },
-    publicKey: {
+    accessTokenSecret: {
       type: String,
       required: true,
     },
-    privateKey: {
+    refreshTokenSecret: {
       type: String,
       required: true,
     },
