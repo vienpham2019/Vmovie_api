@@ -8,21 +8,20 @@ const UserService = require("./User.service");
 
 class AuthService {
   static async logIn({ email, password }) {
-    console.log(email);
-    const foundUser = await getUserByEmail({ user_email: email });
+    const foundUser = await getUserByEmail({ email });
     if (!foundUser) {
       throw new BadRequestError("User not found");
     }
 
     // Check password in DB
-    const matchPassword = byscrypt.compare(password, foundUser.user_password);
+    const matchPassword = byscrypt.compare(password, foundUser.password);
     if (!matchPassword) {
       throw new AuthFailureError("Authentication Error");
     }
 
     return {
       user: getInfoData({
-        fileds: ["_id", "name", "email"],
+        fields: ["_id", "name", "email"],
         object: foundUser,
       }),
     };

@@ -5,22 +5,20 @@ const { createTokenCode } = require("../../util");
 // Get
 const getKeyTokenByUserId = async ({ userId }) => {
   return await keyTokenModel
-    .findOne({ keyToken_userId: new Types.ObjectId(userId) })
+    .findOne({ userId: new Types.ObjectId(userId) })
     .lean();
 };
 const getKeyTokenByRefreshToken = async ({ refreshToken }) => {
-  return await keyTokenModel
-    .findOne({ keyToken_refreshToken: refreshToken })
-    .lean();
+  return await keyTokenModel.findOne({ refreshToken: refreshToken }).lean();
 };
 // Create
 const createKeyToken = async ({ userId, refreshToken }) => {
-  const filter = { keyToken_userId: new Types.ObjectId(userId) };
+  const filter = { userId: new Types.ObjectId(userId) };
   const update = {
-    keyToken_publicKey: createTokenCode(),
-    keyToken_privateKey: createTokenCode(),
-    keyToken_refreshTokensUsed: [],
-    keyToken_refreshToken: refreshToken,
+    publicKey: createTokenCode(),
+    privateKey: createTokenCode(),
+    refreshTokensUsed: [],
+    refreshToken: refreshToken,
   };
   const options = { upsert: true, new: true };
   return await keytokenModel.findOneAndUpdate(filter, update, options);
@@ -30,10 +28,10 @@ const updateRefreshToken = async ({ token, newRefreshToken }) => {
   const filter = { _id: new Types.ObjectId(token._id) };
   const update = {
     $set: {
-      keyToken_refreshToken: newRefreshToken,
+      refreshToken: newRefreshToken,
     },
     $addToSet: {
-      keyToken_refreshTokensUsed: token.refreshToken,
+      refreshTokensUsed: token.refreshToken,
     },
   };
   return await keytokenModel.updateMany(filter, update).lean();

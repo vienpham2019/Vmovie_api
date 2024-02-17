@@ -13,9 +13,9 @@ const getUserById = async ({ _id, select = [] }) => {
     .exec();
 };
 
-const getUserByEmail = async ({ user_email, select = [] }) => {
+const getUserByEmail = async ({ email, select = [] }) => {
   return await userModel
-    .findOne({ user_email })
+    .findOne({ email })
     .select(getSelectData(select))
     .lean()
     .exec();

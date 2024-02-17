@@ -8,8 +8,8 @@ const getUnSelectData = (select = []) => {
   return Object.fromEntries(select.map((el) => [el, 0]));
 };
 
-const getInfoData = ({ fileds = [], object = {} }) => {
-  return _.pick(object, fileds);
+const getInfoData = ({ fields = [], object = {} }) => {
+  return _.pick(object, fields);
 };
 
 const getSkip = ({ limit, page }) => {

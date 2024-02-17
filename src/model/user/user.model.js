@@ -9,22 +9,22 @@ const COLLECTION_NAME = "Users";
 // Declare the Schema of the Mongo model
 const userSchema = new Schema(
   {
-    user_name: {
+    name: {
       type: String,
       trim: true,
       maxLength: 150,
     },
-    user_email: {
+    email: {
       type: String,
       unique: true,
       trim: true,
       required: true,
     },
-    user_password: {
+    password: {
       type: String,
       required: true,
     },
-    user_roles: {
+    roles: {
       type: [String],
       default: [UserRoleEnum.USER],
       enum: Object.values(UserRoleEnum),

@@ -17,18 +17,18 @@ class UserService {
   // Get
   // Create
   static async createUser({ name, email, password }) {
-    const existsEmail = await getUserByEmail({ user_email: email });
+    const existsEmail = await getUserByEmail({ email });
 
     if (existsEmail) {
       throw new ConflictRequestError("Email already registered!");
     }
-    const passwordHash = await byscrypt.hash(password, 10);
+    password = await byscrypt.hash(password, 10);
 
     const newUser = await createUser({
       payload: {
-        user_name: name,
-        user_email: email,
-        user_password: passwordHash,
+        name,
+        email,
+        password,
       },
     });
 
@@ -53,9 +53,9 @@ class UserService {
     }
 
     const payload = {
-      user_name: name,
-      user_email: email,
-      user_password: password,
+      name,
+      email,
+      password,
     };
 
     const updateUser = await updateUserById({ _id, payload });
@@ -65,8 +65,8 @@ class UserService {
     return updateUser;
   }
   // Delete
-  static async deleteUserById({ user_id }) {
-    const deletedUser = await deleteUserById({ _id: user_id });
+  static async deleteUserById({ userId }) {
+    const deletedUser = await deleteUserById({ _id: userId });
     if (!deletedUser) {
       throw new BadRequestError(
         "No user found matching the deletion criteria."
