@@ -1,3 +1,6 @@
+const crypto = require("crypto");
+const _ = require("lodash");
+
 const getSelectData = (select = []) => {
   return Object.fromEntries(select.map((el) => [el, 1]));
 };
@@ -28,6 +31,8 @@ const getSortBy = (sortType) => {
   return sortType === "ctime" ? { _id: -1 } : { _id: 1 };
 };
 
+const createTokenCode = () => crypto.randomBytes(64).toString("hex");
+
 const removeUndefinedNull = (obj) => {
   for (const key in obj) {
     if (obj[key] && typeof obj[key] === "object") {
@@ -51,6 +56,7 @@ module.exports = {
   getInfoData,
   getSkip,
   getSortBy,
+  createTokenCode,
   removeUndefinedNull,
   removeDuplicatesInArray,
 };

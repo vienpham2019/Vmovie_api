@@ -1,6 +1,7 @@
 "use strict";
 const { Types } = require("mongoose");
 const keyTokenModel = require("./keyToken.model");
+const { createTokenCode } = require("../../util");
 // Get
 const getKeyTokenByUserId = async ({ userId }) => {
   return await keyTokenModel
@@ -13,16 +14,11 @@ const getKeyTokenByRefreshToken = async ({ refreshToken }) => {
     .lean();
 };
 // Create
-const createKeyToken = async ({
-  userId,
-  publicKey,
-  privateKey,
-  refreshToken,
-}) => {
+const createKeyToken = async ({ userId, refreshToken }) => {
   const filter = { keyToken_userId: new Types.ObjectId(userId) };
   const update = {
-    keyToken_publicKey: publicKey,
-    keyToken_privateKey: privateKey,
+    keyToken_publicKey: createTokenCode(),
+    keyToken_privateKey: createTokenCode(),
     keyToken_refreshTokensUsed: [],
     keyToken_refreshToken: refreshToken,
   };

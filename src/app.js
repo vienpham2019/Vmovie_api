@@ -3,15 +3,23 @@ const app = express();
 
 const compression = require("compression");
 const { default: helmet } = require("helmet");
+const mongoSanitize = require("express-mongo-sanitize");
+const xss = require("xss-clean");
+
 const morgan = require("morgan");
 const cookieParser = require("cookie-parser");
 const cors = require("cors");
 const corsOptions = require("./config/allowedOrigins");
 // init middlewares
+app.use(express.json());
 // morgan: Logs HTTP requests to the console, providing information such as request method, URL, status code,
 // and response time. Useful for debugging and monitoring.
 app.use(cors(corsOptions));
 app.use(morgan("dev"));
+// mongoSantitize againt NoSQL query injection
+app.use(mongoSanitize());
+// xss againt HTML tag injection
+app.use(xss());
 //helmet: Sets various HTTP headers to improve security, including headers like Content Security Policy (CSP),
 //Strict-Transport-Security, X-Frame-Options, and more.
 app.use(helmet());
@@ -33,7 +41,7 @@ app.use(cookieParser());
 require("./db/init.mongodb");
 
 // init routes
-app.use("", require("./route"));
+app.use("/v1/api", require("./route"));
 
 // handle error
 app.use((req, res, next) => {
