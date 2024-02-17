@@ -32,6 +32,8 @@ const getSortBy = (sortType) => {
 };
 
 const daysToMilliseconds = (days) => days * 24 * 60 * 60 * 1000;
+const hoursToMilliseconds = (hours) => hours * 60 * 60 * 1000;
+const minsToMilliseconds = (mins) => mins * 60 * 1000;
 
 const createTokenCode = () => crypto.randomBytes(64).toString("hex");
 
@@ -59,6 +61,8 @@ module.exports = {
   getSkip,
   getSortBy,
   daysToMilliseconds,
+  hoursToMilliseconds,
+  minsToMilliseconds,
   createTokenCode,
   removeUndefinedNull,
   removeDuplicatesInArray,
