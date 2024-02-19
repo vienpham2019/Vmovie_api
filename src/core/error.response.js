@@ -27,15 +27,6 @@ class BadRequestError extends ErrorResponse {
   }
 }
 
-class AuthFailureError extends ErrorResponse {
-  constructor(
-    message = ReasonPhrases.UNAUTHORIZED,
-    statusCode = StatusCodes.UNAUTHORIZED
-  ) {
-    super(message, statusCode);
-  }
-}
-
 class NotFoundError extends ErrorResponse {
   constructor(
     message = ReasonPhrases.NOT_FOUND,
@@ -63,11 +54,20 @@ class IternalServerError extends ErrorResponse {
   }
 }
 
+class UnauthorizedError extends ErrorResponse {
+  constructor(
+    message = ReasonPhrases.UNAUTHORIZED,
+    statusCode = StatusCodes.UNAUTHORIZED
+  ) {
+    super(message, statusCode);
+  }
+}
+
 module.exports = {
   ConflictRequestError,
   BadRequestError,
-  AuthFailureError,
   NotFoundError,
   ForbiddenError,
   IternalServerError,
+  UnauthorizedError,
 };

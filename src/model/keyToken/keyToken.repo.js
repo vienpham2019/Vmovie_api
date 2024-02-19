@@ -37,10 +37,15 @@ const updateRefreshToken = async ({ token, newRefreshToken }) => {
   return await keyTokenModel.updateMany(filter, update).lean();
 };
 // Delete
-
+const deleteKeyTokenByUserId = async ({ userId }) => {
+  return await keyTokenModel
+    .deleteOne({ userId: new Types.ObjectId(userId) })
+    .lean();
+};
 module.exports = {
   getKeyTokenByUserId,
   getKeyTokenByRefreshToken,
   createKeyToken,
   updateRefreshToken,
+  deleteKeyTokenByUserId,
 };

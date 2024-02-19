@@ -3,15 +3,19 @@ const byscrypt = require("bcrypt");
 
 const {
   BadRequestError,
-  AuthFailureError,
   ForbiddenError,
   IternalServerError,
+  UnauthorizedError,
 } = require("../core/error.response");
 const { getUserByEmail } = require("../model/user/user.repo");
 const { createTokenCode } = require("../util");
 const UserService = require("./User.service");
 const { createTokenPair } = require("../middleware/authUtil");
-const { createKeyToken } = require("../model/keyToken/keyToken.repo");
+const {
+  createKeyToken,
+  deleteKeyTokenByUserId,
+  updateRefreshToken,
+} = require("../model/keyToken/keyToken.repo");
 
 class AuthService {
   static async logIn({ email, password }) {
@@ -23,7 +27,7 @@ class AuthService {
     // Check password in DB
     const matchPassword = byscrypt.compare(password, foundUser.password);
     if (!matchPassword) {
-      throw new AuthFailureError("Authentication Error");
+      throw new UnauthorizedError();
     }
     const accessTokenSecret = createTokenCode();
     const refeshTokenSecret = createTokenCode();
@@ -31,7 +35,6 @@ class AuthService {
     const { accessToken, refreshToken } = await createTokenPair(
       {
         userId: foundUser._id,
-        email,
       },
       accessTokenSecret,
       refeshTokenSecret
@@ -60,6 +63,40 @@ class AuthService {
       throw new BadRequestError(`Can't registered`);
     }
     return newUser;
+  }
+
+  static async handleRefreshToken({ user, keyStore, refreshToken }) {
+    const { userId } = user;
+    if (keyStore.refreshTokensUsed.includes(refreshToken)) {
+      await deleteKeyTokenByUserId({ userId });
+      throw new ForbiddenError("Something wrong happed! Please re-login");
+    }
+
+    // Create new refresh and access token
+    const { accessToken, refreshToken } = await createTokenPair(
+      { userId },
+      keyStore.accessTokenSecret,
+      keyStore.refeshTokenSecret
+    );
+
+    const updateRefreshToken = await updateRefreshToken({
+      token: keyStore,
+      newRefreshToken: refreshToken,
+    });
+
+    if (!updateRefreshToken) {
+      throw IternalServerError();
+    }
+
+    return { accessToken, refreshToken };
+  }
+
+  static async logOut({ user }) {
+    const deleteToken = await deleteKeyTokenByUserId({ userId: user.userId });
+    if (!deleteToken) {
+      throw IternalServerError();
+    }
+    return deleteToken;
   }
 }
 module.exports = AuthService;

@@ -1,12 +1,14 @@
 "use strict";
-const { BadRequestError, AuthFailureError } = require("../core/error.response");
-const asyncHandler = require("../helper/asyncHandler");
+const {
+  BadRequestError,
+  UnauthorizedError,
+} = require("../core/error.response");
+const { asyncHandler } = require("../helper/asyncHandler");
 
 const HEADER = {
   API_KEY: "x-api-key",
   CLIENT_ID: "x-client-id",
   AUTHORIZATION: "athorization",
-  REFRESHTOKEN: "refreshtoken",
 };
 
 const checkUserRole = (role) => {
@@ -25,50 +27,36 @@ const checkUserRole = (role) => {
 };
 
 const authentication = asyncHandler(async (req, res, next) => {
+  const cookies = req.cookies;
   const userId = req.headers[HEADER.CLIENT_ID];
-  if (!userId) {
-    throw new AuthFailureError("Invalid Request");
+  if (!cookies?.jwt || !userId) {
+    throw new UnauthorizedError();
   }
 
   const keyStore = await getKeyTokenByUserId({ userId });
-  if (!keyStore) {
-    throw new NotFoundError("Not found keyStore");
-  }
-
-  const refreshToken = req.headers[HEADER.REFRESHTOKEN];
-  if (refreshToken) {
-    try {
-      // check keyStore with user id
-      const decodeUser = JWT.verify(refreshToken, keyStore.privateKey);
-      if (userId != decodeUser.userId) {
-        throw new AuthFailureError("Invalid UserId");
-      }
-      // Ok all then return next
-      req.keyStore = keyStore;
-      req.user = decodeUser;
-      req.refreshToken = refreshToken;
-      return next();
-    } catch (error) {
-      throw error;
-    }
-  }
-
   // verify access token
   const accessToken = req.headers[HEADER.AUTHORIZATION];
-  if (!accessToken) {
-    throw new AuthFailureError("Invalid Request");
+  if (!keyStore || !accessToken || !accessToken?.startsWith("Bearer ")) {
+    throw new UnauthorizedError();
+  }
+
+  if (keyStore.refreshToken !== cookies.jwt) {
+    throw new UnauthorizedError();
   }
 
   try {
     // check keyStore with user id
-    const decodeUser = JWT.verify(accessToken, keyStore.publicKey);
+    const decodeUser = JWT.verify(
+      accessToken.split(" ")[1],
+      keyStore.publicKey
+    );
     if (userId != decodeUser.userId) {
-      throw new AuthFailureError("Invalid UserId");
+      throw new UnauthorizedError();
     }
     // Ok all then return next
     req.keyStore = keyStore;
     req.user = decodeUser;
-    req.refreshToken = refreshToken;
+    req.refreshToken = cookies.jwt;
     return next();
   } catch (error) {
     throw error;
