@@ -8,6 +8,7 @@ const {
   refresh,
   logOut,
 } = require("../controller/auth.controller");
+
 const { asyncHandler } = require("../helper/asyncHandler");
 const { loginLimiter, registerLimiter } = require("../middleware/checkLimiter");
 const { authentication } = require("../middleware/checkAuth");
@@ -18,7 +19,7 @@ router.post("/signUp", registerLimiter, asyncHandler(signUp));
 // authentication
 router.use(authentication);
 
-router.post("/refresh", asyncHandler(refresh));
-router.post("/logOut", asyncHandler(logOut));
+router.get("/refresh", asyncHandler(refresh));
+router.get("/logOut", asyncHandler(logOut));
 
 module.exports = router;

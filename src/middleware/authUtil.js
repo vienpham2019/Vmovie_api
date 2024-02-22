@@ -3,7 +3,7 @@ const JWT = require("jsonwebtoken");
 const createTokenPair = async (
   payload,
   accessTokenSecret,
-  refeshTokenSecret
+  refreshTokenSecret
 ) => {
   try {
     // access token
@@ -12,7 +12,7 @@ const createTokenPair = async (
     });
 
     // refresh token
-    const refreshToken = await JWT.sign(payload, refeshTokenSecret, {
+    const refreshToken = await JWT.sign(payload, refreshTokenSecret, {
       expiresIn: "7 days",
     });
 

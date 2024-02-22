@@ -1,4 +1,5 @@
-const allowedOrigins = ["http://localhost:3000"];
+require("dotenv").config();
+const allowedOrigins = [process.env.CLIENT_URL];
 
 const corsOptions = {
   origin: (origin, callback) => {

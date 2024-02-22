@@ -10,6 +10,7 @@ const morgan = require("morgan");
 const cookieParser = require("cookie-parser");
 const cors = require("cors");
 const corsOptions = require("./config/allowedOrigins");
+
 // init middlewares
 app.use(express.json());
 // morgan: Logs HTTP requests to the console, providing information such as request method, URL, status code,
@@ -42,7 +43,6 @@ require("./db/init.mongodb");
 
 // init routes
 app.use("/v1/api", require("./route"));
-
 // handle error
 app.use((req, res, next) => {
   const error = new Error("Not Found");
