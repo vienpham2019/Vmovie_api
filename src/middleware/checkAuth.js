@@ -4,18 +4,17 @@ const {
   UnauthorizedError,
 } = require("../core/error.response");
 const { asyncHandler } = require("../helper/asyncHandler");
+const RedisService = require("../service/redis.service");
 
 const HEADER = {
   API_KEY: "x-api-key",
-  CLIENT_ID: "x-client-id",
   AUTHORIZATION: "athorization",
 };
 
 const checkUserRole = (role) => {
   return asyncHandler(async (req, res, next) => {
     try {
-      const foundUser = await getUserById({ userId: req.user.userId });
-      const validUserRole = foundUser.user_roles.includes(role);
+      const validUserRole = req.user.roles.includes(role);
       if (!validUserRole) {
         throw new BadRequestError("Request denied");
       }
@@ -28,19 +27,12 @@ const checkUserRole = (role) => {
 
 const authentication = asyncHandler(async (req, res, next) => {
   const cookies = req.cookies;
-  const userId = req.headers[HEADER.CLIENT_ID];
-  if (!cookies?.jwt || !userId) {
+  if (!cookies?.jwt) {
     throw new UnauthorizedError();
   }
-
-  const keyStore = await getKeyTokenByUserId({ userId });
   // verify access token
   const accessToken = req.headers[HEADER.AUTHORIZATION];
-  if (!keyStore || !accessToken || !accessToken?.startsWith("Bearer ")) {
-    throw new UnauthorizedError();
-  }
-
-  if (keyStore.refreshToken !== cookies.jwt) {
+  if (!accessToken || !accessToken?.startsWith("Bearer ")) {
     throw new UnauthorizedError();
   }
 
@@ -48,13 +40,14 @@ const authentication = asyncHandler(async (req, res, next) => {
     // check keyStore with user id
     const decodeUser = JWT.verify(
       accessToken.split(" ")[1],
-      keyStore.publicKey
+      process.env.ACCESS_TOKEN_SECRET
     );
-    if (userId != decodeUser.userId) {
+    // check refreshtoken in black list
+    const blacklistRefresh = await RedisService.get(cookies.jwt);
+    if (blacklistRefresh) {
       throw new UnauthorizedError();
     }
     // Ok all then return next
-    req.keyStore = keyStore;
     req.user = decodeUser;
     req.refreshToken = cookies.jwt;
     return next();

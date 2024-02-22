@@ -7,18 +7,13 @@ const {
   UnauthorizedError,
 } = require("../core/error.response");
 const { getUserByEmail } = require("../model/user/user.repo");
-const { createTokenCode } = require("../util");
+const { daysToSeconds } = require("../util");
 const UserService = require("./User.service");
 const { createTokenPair } = require("../middleware/authUtil");
-const {
-  createKeyToken,
-  deleteKeyTokenByUserId,
-  updateRefreshToken,
-} = require("../model/keyToken/keyToken.repo");
+const RedisService = require("./redis.service");
 
 class AuthService {
   static async logIn({ email, password }) {
-    await setAsync("mykey", "Hello Redis with TTL!", "EX", 60);
     const foundUser = await getUserByEmail({ email });
     if (!foundUser) {
       throw new UnauthorizedError("Invalid email or password");
@@ -27,26 +22,11 @@ class AuthService {
     if (!matchPassword) {
       throw new UnauthorizedError("Invalid email or password");
     }
-    const accessTokenSecret = createTokenCode();
-    const refreshTokenSecret = createTokenCode();
 
-    const { accessToken, refreshToken } = await createTokenPair(
-      {
-        userId: foundUser._id,
-      },
-      accessTokenSecret,
-      refreshTokenSecret
-    );
-
-    const keyStore = await createKeyToken({
+    const { accessToken, refreshToken } = await createTokenPair({
       userId: foundUser._id,
-      refreshTokenSecret,
-      accessTokenSecret,
+      roles: foundUser.roles,
     });
-
-    if (!keyStore) {
-      throw IternalServerError();
-    }
 
     return {
       accessToken,
@@ -62,36 +42,12 @@ class AuthService {
     return newUser;
   }
 
-  static async handleRefreshToken({ user, keyStore, refreshToken }) {
+  static async handleRefreshToken({ user, refreshToken }) {
     const { userId } = user;
-    // Check refresh token in redis
-    // if (keyStore.refreshTokensUsed.includes(refreshToken)) {
-    //   await deleteKeyTokenByUserId({ userId });
-    //   throw new ForbiddenError("Something wrong happed! Please re-login");
-    // }
+    // add refresh token into blacklist
+    await RedisService.set(refreshToken, userId, 60);
 
-    // Create new refresh and access token
-    const tokens = await createTokenPair(
-      { userId },
-      keyStore.accessTokenSecret,
-      keyStore.refeshTokenSecret
-    );
-
-    // Store old_token in redis for black list
-
-    if (!updateRefreshToken) {
-      throw IternalServerError();
-    }
-
-    return tokens;
-  }
-
-  static async logOut({ user }) {
-    const deleteToken = await deleteKeyTokenByUserId({ userId: user.userId });
-    if (!deleteToken) {
-      throw IternalServerError();
-    }
-    return deleteToken;
+    return await createTokenPair(user);
   }
 }
 module.exports = AuthService;

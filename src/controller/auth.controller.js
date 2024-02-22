@@ -37,7 +37,6 @@ class AuthController {
   refresh = async (req, res, next) => {
     clearJwtCookie(res);
     const { accessToken, refreshToken } = await AuthService.handleRefreshToken({
-      keyStore: req.keyStore,
       user: req.user,
       refreshToken: req.refreshToken,
     });
@@ -52,7 +51,7 @@ class AuthController {
     clearJwtCookie(res);
     new OK({
       message: "Login Success!",
-      metadata: await AuthService.logOut({ user: req.user }),
+      metadata: { message: "" },
     }).send(res);
   };
 }
