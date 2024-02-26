@@ -13,6 +13,11 @@ class RedisService {
     const getAsync = promisify(redisClient.get).bind(redisClient);
     return await getAsync(key);
   }
+
+  static async delete(key) {
+    const delAsync = promisify(redisClient.del).bind(redisClient);
+    return await delAsync(key);
+  }
 }
 
 module.exports = RedisService;

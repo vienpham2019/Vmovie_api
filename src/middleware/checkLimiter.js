@@ -28,4 +28,10 @@ const registerLimiter = createLimiter({
   duration: "1 hour.",
 });
 
-module.exports = { loginLimiter, registerLimiter };
+const forgotPasswordLimiter = createLimiter({
+  windowMs: minsToMilliseconds(1),
+  max: 1,
+  duration: "1 min",
+});
+
+module.exports = { loginLimiter, registerLimiter, forgotPasswordLimiter };

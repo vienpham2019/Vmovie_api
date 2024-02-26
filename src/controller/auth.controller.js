@@ -19,11 +19,27 @@ const clearJwtCookie = (res) => {
 
 class AuthController {
   logIn = async (req, res, next) => {
-    const { accessToken, refreshToken } = await AuthService.logIn(req.body);
+    const { accessToken, refreshToken, userId } = await AuthService.logIn(
+      req.body
+    );
     setJwtCookie(res, refreshToken);
     new OK({
       message: "Login Success!",
-      metadata: { accessToken },
+      metadata: { accessToken, userId },
+    }).send(res);
+  };
+
+  checkResetPasswordToken = async (req, res, next) => {
+    new OK({
+      message: "Reset Password Valid",
+      metadata: await AuthService.checkResetPasswordToken(req.body),
+    }).send(res);
+  };
+
+  forgotPassword = async (req, res, next) => {
+    new OK({
+      message: "Send Reset Password Success!",
+      metadata: await AuthService.forgotPassword(req.body),
     }).send(res);
   };
 
@@ -51,7 +67,7 @@ class AuthController {
     clearJwtCookie(res);
     new OK({
       message: "Login Success!",
-      metadata: { message: "" },
+      metadata: await AuthService.logOut(req.user),
     }).send(res);
   };
 }

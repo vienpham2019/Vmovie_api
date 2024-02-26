@@ -1,13 +1,13 @@
 "use strict";
 
-const { getSelectData } = require("../../util");
+const { getSelectData, convertToObjectIdMongoDB } = require("../../util");
 const { UserRoleEnum } = require("./user.enum");
 const userModel = require("./user.model");
 
 // Get
 const getUserById = async ({ _id, select = [] }) => {
   return await userModel
-    .findById(_id)
+    .findById(convertToObjectIdMongoDB(_id))
     .select(getSelectData(select))
     .lean()
     .exec();
@@ -30,7 +30,7 @@ const updateUserById = async ({
   _id,
   unSelect = ["createdAt", "updatedAt", "__v", "_id"],
 }) => {
-  const filter = { _id };
+  const filter = { _id: convertToObjectIdMongoDB(_id) };
   const update = {
     $set: payload,
   };
@@ -42,7 +42,9 @@ const updateUserById = async ({
 };
 // Delete
 const deleteUserById = async ({ _id }) => {
-  return await userModel.findOneAndDelete({ _id }).lean();
+  return await userModel
+    .findOneAndDelete({ _id: convertToObjectIdMongoDB(_id) })
+    .lean();
 };
 
 module.exports = {

@@ -4,10 +4,11 @@ const {
   UnauthorizedError,
 } = require("../core/error.response");
 const { asyncHandler } = require("../helper/asyncHandler");
-const RedisService = require("../service/redis.service");
+const { getKeyTokenByUserId } = require("../model/keyToken/keyToken.repo");
 
 const HEADER = {
   API_KEY: "x-api-key",
+  CLIENT_ID: "x-client-id",
   AUTHORIZATION: "athorization",
 };
 
@@ -30,6 +31,11 @@ const authentication = asyncHandler(async (req, res, next) => {
   if (!cookies?.jwt) {
     throw new UnauthorizedError();
   }
+  const userId = req.headers[HEADER.CLIENT_ID];
+  if (!userId) {
+    throw new UnauthorizedError();
+  }
+
   // verify access token
   const accessToken = req.headers[HEADER.AUTHORIZATION];
   if (!accessToken || !accessToken?.startsWith("Bearer ")) {
@@ -37,14 +43,16 @@ const authentication = asyncHandler(async (req, res, next) => {
   }
 
   try {
-    // check keyStore with user id
+    const keyTokens = await getKeyTokenByUserId({ userId });
+    if (!keyTokens) {
+      throw new UnauthorizedError();
+    }
+    // check keyTokens with user id
     const decodeUser = JWT.verify(
       accessToken.split(" ")[1],
-      process.env.ACCESS_TOKEN_SECRET
+      keyTokens.refreshTokenSecret
     );
-    // check refreshtoken in black list
-    const blacklistRefresh = await RedisService.get(cookies.jwt);
-    if (blacklistRefresh) {
+    if (userId != decodeUser.userId) {
       throw new UnauthorizedError();
     }
     // Ok all then return next

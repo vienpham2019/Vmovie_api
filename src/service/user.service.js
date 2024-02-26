@@ -38,7 +38,7 @@ class UserService {
     if (!newUser) {
       throw new BadRequestError(`Invalid user data received`);
     }
-    return newUser;
+    return { message: "SignUp successful" };
   }
   // Update
   static async updateUserById({ _id, name, email, password }) {
@@ -77,7 +77,7 @@ class UserService {
         "No user found matching the deletion criteria."
       );
     }
-    return deletedUser;
+    return { message: "Update successful" };
   }
 }
 module.exports = UserService;

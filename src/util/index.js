@@ -1,6 +1,7 @@
 const crypto = require("crypto");
 const _ = require("lodash");
-
+const { Types } = require("mongoose");
+const convertToObjectIdMongoDB = (id) => new Types.ObjectId(id);
 const getSelectData = (select = []) => {
   return Object.fromEntries(select.map((el) => [el, 1]));
 };
@@ -58,6 +59,7 @@ const removeUndefinedNull = (obj) => {
 const removeDuplicatesInArray = (array) => [...new Set(array)];
 
 module.exports = {
+  convertToObjectIdMongoDB,
   getSelectData,
   getUnSelectData,
   getInfoData,

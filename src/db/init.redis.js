@@ -24,9 +24,4 @@ redisClient.ping((err, result) => {
   }
 });
 
-process.on("SIGINT", () => {
-  redisClient.quit();
-  console.log("Redis disconnect");
-});
-
 module.exports = redisClient;
