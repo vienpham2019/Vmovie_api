@@ -19,19 +19,29 @@ const createLimiter = ({ windowMs, max, duration }) => {
 const loginLimiter = createLimiter({
   windowMs: minsToMilliseconds(1),
   max: 5,
-  duration: "1 min.",
+  duration: "1 min",
 });
 
 const registerLimiter = createLimiter({
   windowMs: hoursToMilliseconds(1),
   max: 5,
-  duration: "1 hour.",
+  duration: "1 hour",
 });
 
-const forgotPasswordLimiter = createLimiter({
+const resendForgotPasswordLimiter = createLimiter({
   windowMs: minsToMilliseconds(1),
   max: 1,
   duration: "1 min",
 });
+const forgotPasswordLimiter = createLimiter({
+  windowMs: minsToMilliseconds(1),
+  max: 10,
+  duration: "1 min",
+});
 
-module.exports = { loginLimiter, registerLimiter, forgotPasswordLimiter };
+module.exports = {
+  loginLimiter,
+  registerLimiter,
+  forgotPasswordLimiter,
+  resendForgotPasswordLimiter,
+};

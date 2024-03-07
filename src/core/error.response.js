@@ -63,6 +63,24 @@ class UnauthorizedError extends ErrorResponse {
   }
 }
 
+class RequestEntityTooLargeError extends ErrorResponse {
+  constructor(
+    message = ReasonPhrases.REQUEST_TOO_LONG,
+    statusCode = StatusCodes.REQUEST_TOO_LONG
+  ) {
+    super(message, statusCode);
+  }
+}
+
+class UnprocessableEntityError extends ErrorResponse {
+  constructor(
+    message = ReasonPhrases.UNPROCESSABLE_ENTITY,
+    statusCode = StatusCodes.UNPROCESSABLE_ENTITY
+  ) {
+    super(message, statusCode);
+  }
+}
+
 module.exports = {
   ConflictRequestError,
   BadRequestError,
@@ -70,4 +88,6 @@ module.exports = {
   ForbiddenError,
   IternalServerError,
   UnauthorizedError,
+  RequestEntityTooLargeError,
+  UnprocessableEntityError,
 };

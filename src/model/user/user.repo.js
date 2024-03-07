@@ -34,7 +34,7 @@ const updateUserById = async ({
   const update = {
     $set: payload,
   };
-  const options = { new: isNew };
+  const options = {};
   return await userModel
     .findOneAndUpdate(filter, update, options)
     .select(getSelectData(unSelect))

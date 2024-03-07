@@ -42,14 +42,17 @@ class UserService {
   }
   // Update
   static async updateUserById({ _id, name, email, password }) {
-    if (email) validateEmail(email);
+    if (email) {
+      validateEmail(email);
+      const foundDuplicateEmail = await getUserByEmail({ email });
+      if (foundDuplicateEmail && foundDuplicateEmail?._id.toString() !== _id) {
+        throw new ConflictRequestError("Email already registered!");
+      }
+    }
+
     const foundUser = await getUserById({ _id });
     if (!foundUser) {
       throw new BadRequestError("User not found");
-    }
-    const foundDuplicateEmail = await getUserByEmail({ email });
-    if (foundDuplicateEmail && foundDuplicateEmail?._id.toString() !== _id) {
-      throw new ConflictRequestError("Email already registered!");
     }
 
     if (password) {

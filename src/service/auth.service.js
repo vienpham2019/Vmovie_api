@@ -1,13 +1,7 @@
 "use strict";
 const bcrypt = require("bcrypt");
-const {
-  BadRequestError,
-  ForbiddenError,
-  IternalServerError,
-  UnauthorizedError,
-  NotFoundError,
-} = require("../core/error.response");
-const { getUserByEmail } = require("../model/user/user.repo");
+const { UnauthorizedError, NotFoundError } = require("../core/error.response");
+const { getUserByEmail, getUserById } = require("../model/user/user.repo");
 const { createTokenCode, minsToSeconds } = require("../util");
 const UserService = require("./User.service");
 const { createTokenPair } = require("../middleware/authUtil");
@@ -62,15 +56,19 @@ class AuthService {
     return { message: "Signup successful" };
   }
 
-  static async checkResetPasswordToken({ token }) {
-    const foundToken = await RedisService.get(token);
+  static async resetPassword({ token, password }) {
+    const foundToken = await RedisService.get(`forgot_pass:${token}`);
     if (!foundToken) {
       throw new NotFoundError(
         "The reset password token is invalid, expired, or has already been used. Please request a new reset link."
       );
     }
 
-    return { message: "Valid reset password token" };
+    const foundUser = await getUserById({ _id: foundToken });
+    await UserService.updateUserById({ _id: foundUser._id, password });
+    await RedisService.delete(`forgot_pass:${token}`);
+
+    return { message: "Your password has been changed successfully." };
   }
 
   static async forgotPassword({ email, clientUrl }) {
@@ -80,15 +78,15 @@ class AuthService {
     }
 
     const { _id } = foundUser;
-
+    await RedisService.deleteAllKeysByValue("forgot_pass:*", _id.toString());
     const token = createTokenCode();
     await RedisService.set(
       `forgot_pass:${token}`,
       _id.toString(),
       minsToSeconds(15)
     );
+    console.log(token);
     // send to user
-
     return { message: "Send Successful" };
   }
 

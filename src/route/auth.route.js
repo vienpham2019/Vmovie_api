@@ -8,7 +8,7 @@ const {
   refresh,
   logOut,
   forgotPassword,
-  checkResetPasswordToken,
+  resetPassword,
 } = require("../controller/auth.controller");
 
 const { asyncHandler } = require("../helper/asyncHandler");
@@ -16,18 +16,23 @@ const {
   loginLimiter,
   registerLimiter,
   forgotPasswordLimiter,
+  resendForgotPasswordLimiter,
 } = require("../middleware/checkLimiter");
 const { authentication } = require("../middleware/checkAuth");
 
 router.post("/logIn", loginLimiter, asyncHandler(logIn));
 router.post("/signUp", registerLimiter, asyncHandler(signUp));
-router.post("/forgotPassword", asyncHandler(forgotPassword));
 router.post(
-  "/resendForgotPassword",
+  "/forgotPassword",
   forgotPasswordLimiter,
   asyncHandler(forgotPassword)
 );
-router.post("/checkValidResetToken", asyncHandler(checkResetPasswordToken));
+router.post(
+  "/resendForgotPassword",
+  resendForgotPasswordLimiter,
+  asyncHandler(forgotPassword)
+);
+router.post("/resetPassword", asyncHandler(resetPassword));
 
 // authentication
 router.use(authentication);

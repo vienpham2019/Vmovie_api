@@ -29,10 +29,10 @@ class AuthController {
     }).send(res);
   };
 
-  checkResetPasswordToken = async (req, res, next) => {
+  resetPassword = async (req, res, next) => {
     new OK({
       message: "Reset Password Valid",
-      metadata: await AuthService.checkResetPasswordToken(req.body),
+      metadata: await AuthService.resetPassword(req.body),
     }).send(res);
   };
 
