@@ -10,6 +10,16 @@ const COLLECTION_NAME = "Movies";
 const movieSchema = new Schema(
   {
     title: String,
+    votes: {
+      type: Number,
+      default: 0,
+      min: 0,
+      max: 5,
+    },
+    reviews: {
+      type: Number,
+      default: 0,
+    },
     rating: {
       type: String,
       enum: Object.values(RatingEnum),
@@ -25,6 +35,13 @@ const movieSchema = new Schema(
       type: [movieCast],
       default: [],
     },
+    director: {
+      type: [String],
+      index: true,
+    },
+    studio: [String],
+    producer: [String],
+    writer: [String],
     posterUrl: String,
     photoUrls: {
       type: [String],
