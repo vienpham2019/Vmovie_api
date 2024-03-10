@@ -1,61 +1,70 @@
 "use strict";
-const { createImage } = require("../model/image/image.repo");
 const {
-  IternalServerError,
+  InternalServerError,
   BadRequestError,
 } = require("../core/error.response");
-const path = require("path");
-const googleDrive = require("../db/init.googleDrive");
-const fs = require("fs");
-const { Readable } = require("stream");
+const { formatFileSize } = require("../util");
+const cloudBucket = require("../db/init.googleCloud");
 
 class ImageService {
-  static async createImage({ files }) {
-    const file = files["file"];
+  static async createImage({ file }) {
+    if (!file) {
+      throw new BadRequestError("No file uploaded");
+    }
+
+    if (!file.mimetype.startsWith("image/")) {
+      throw new BadRequestError("Only images are allowed");
+    }
+
+    if (!["image/jpeg", "image/png", "image/jpg"].includes(file.mimetype)) {
+      throw new BadRequestError(
+        `${file.mimetype.split("/")[1]} is not allowed`
+      );
+    }
+
+    if (file.size > 5 * 1024 * 1024) {
+      throw new BadRequestError("File size exceeds the limit");
+    }
+
+    return new Promise((resolve, reject) => {
+      const blob = cloudBucket.file(file.originalname);
+      const blobStream = blob.createWriteStream();
+
+      blobStream.on("error", (error) => {
+        reject(error);
+      });
+
+      blobStream.on("finish", async () => {
+        try {
+          // Retrieve metadata of the uploaded file
+          const [{ bucket, name, contentType, size }] =
+            await blob.getMetadata();
+          const url = `https://storage.cloud.google.com/${bucket}/${name}?authuser=0`;
+          const data = {
+            name,
+            mimeType: contentType,
+            size: formatFileSize(size - 0),
+            url,
+          };
+          resolve(data);
+        } catch (error) {
+          reject(error);
+        }
+      });
+
+      blobStream.end(file.buffer);
+    });
+  }
+
+  static async deleteImage({ fileName }) {
     try {
-      const imageStream = new Readable();
-      imageStream.push(file.data);
-      imageStream.push(null); // Signal the end of the stream
-      const createFileResponse = await googleDrive.files.create({
-        requestBody: {
-          name: file.name,
-          mimeType: file.mimetype,
-        },
-        media: {
-          mimeType: file.mimetype,
-          body: imageStream,
-        },
-      });
-
-      // Set permissions for the created file
-      const setPermit = await googleDrive.permissions.create({
-        fileId: createFileResponse.data.id,
-        requestBody: {
-          role: "reader",
-          type: "anyone",
-        },
-      });
-
-      if (!setPermit) {
-        throw new IternalServerError(`Failed to set image permit`);
+      if (!fileName) {
+        throw new BadRequestError("No file name");
       }
-
-      // Get the web view link for the created file
-      const webViewLinkResponse = await googleDrive.files.get({
-        fileId: createFileResponse.data.id,
-        fields: "webViewLink",
-      });
-
-      if (!webViewLinkResponse) {
-        throw new IternalServerError(`Failed to get image URL`);
-      }
-
-      const url = webViewLinkResponse.data.webViewLink;
-
-      return { ...createFileResponse.data, url };
+      await cloudBucket.file(fileName).delete();
+      return { message: `File ${fileName} deleted successfully` };
     } catch (error) {
-      console.error("Error uploading image to Google Drive:", error);
-      throw new IternalServerError("Failed to upload image to Google Drive");
+      throw new InternalServerError(`Failed to delete file ${fileName}`);
     }
   }
 }

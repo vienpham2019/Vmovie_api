@@ -45,7 +45,7 @@ class ForbiddenError extends ErrorResponse {
   }
 }
 
-class IternalServerError extends ErrorResponse {
+class InternalServerError extends ErrorResponse {
   constructor(
     message = ReasonPhrases.INTERNAL_SERVER_ERROR,
     statusCode = StatusCodes.INTERNAL_SERVER_ERROR
@@ -86,7 +86,7 @@ module.exports = {
   BadRequestError,
   NotFoundError,
   ForbiddenError,
-  IternalServerError,
+  InternalServerError,
   UnauthorizedError,
   RequestEntityTooLargeError,
   UnprocessableEntityError,

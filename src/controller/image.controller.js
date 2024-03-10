@@ -10,6 +10,13 @@ class ImageController {
       metadata: await ImageService.createImage(req),
     }).send(res);
   };
+
+  deleteImage = async (req, res, next) => {
+    new OK({
+      message: "Image delete successfully!",
+      metadata: await ImageService.deleteImage(req.params),
+    }).send(res);
+  };
 }
 
 module.exports = new ImageController();
