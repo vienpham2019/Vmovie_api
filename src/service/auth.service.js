@@ -96,17 +96,22 @@ class AuthService {
     const refreshTokenSecret = createTokenCode();
     const accessTokenSecret = createTokenCode();
 
+    const { accessToken, refreshToken } = await createTokenPair({
+      payload: { userId },
+      refreshTokenSecret,
+      accessTokenSecret,
+    });
+
     await createOrUpdateKeyToken({
       userId,
       refreshTokenSecret,
       accessTokenSecret,
     });
 
-    return await createTokenPair({
-      payload: user,
-      accessTokenSecret,
-      refreshTokenSecret,
-    });
+    return {
+      accessToken,
+      refreshToken,
+    };
   }
 
   static async logOut({ userId }) {

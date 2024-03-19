@@ -10,7 +10,7 @@ const COLLECTION_NAME = "Movies";
 const movieSchema = new Schema(
   {
     title: String,
-    votes: {
+    ratingScores: {
       type: Number,
       default: 0,
       min: 0,
@@ -20,19 +20,21 @@ const movieSchema = new Schema(
       type: Number,
       default: 0,
     },
+    yearRelease: String,
     rating: {
       type: String,
       enum: Object.values(RatingEnum),
     },
     runtime: String,
-    releaseDate: String,
     genre: {
-      type: String,
+      type: [String],
       enum: [Object.values(GenreEnum)],
     },
+    country: [String],
+    language: [String],
     movieDetail: String,
     cast: {
-      type: [movieCast],
+      type: [String],
       default: [],
     },
     director: {
@@ -42,15 +44,13 @@ const movieSchema = new Schema(
     studio: [String],
     producer: [String],
     writer: [String],
-    posterUrl: String,
-    photoUrls: {
-      type: [String],
+    poster: pictureSchema,
+    background: pictureSchema,
+    photos: {
+      type: [pictureSchema],
       default: [],
     },
-    videoUrls: {
-      type: [String],
-      default: [],
-    },
+    trailer: String,
     isPublished: {
       type: Boolean,
       default: false,
@@ -63,6 +63,18 @@ const movieSchema = new Schema(
       index: true,
       select: false,
     },
+    isCompleted: {
+      type: Boolean,
+      default: false,
+      index: true,
+      select: false,
+    },
+    createBy: {
+      type: Schema.Types.ObjectId,
+      required: true,
+      ref: "User",
+      select: false,
+    },
   },
   {
     timestamps: true,
@@ -70,10 +82,12 @@ const movieSchema = new Schema(
   }
 );
 
-const movieCast = new Schema(
+const pictureSchema = new Schema(
   {
-    name: String,
+    mimeType: String,
     url: String,
+    size: String,
+    name: String,
   },
   {
     _id: false,

@@ -28,7 +28,6 @@ app.use(helmet());
 app.use(compression());
 //express.json() : Parses incoming JSON requests, making the JSON data available in req.body for easy access
 //in your route handlers.
-app.use(express.json());
 //Parses incoming URL-encoded form data, making it available in req.body for easy access in your route handlers.
 app.use(
   express.urlencoded({

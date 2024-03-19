@@ -8,13 +8,29 @@ const setJwtCookie = (res, refreshToken) => {
   res.cookie("jwt", refreshToken, {
     httpOnly: true, // accessible only by web server
     secure: false, // https
-    sameSite: "None", // cross-site cookie
+    sameSite: "Strict", // cross-site cookie
     maxAge: daysToMilliseconds(7), // 7 days
+  });
+};
+
+const setUserIdCookie = (res, memberId) => {
+  res.cookie("UserId", memberId, {
+    httpOnly: true, // accessible only by web server
+    secure: false, // https
+    sameSite: "Strict", // cross-site cookie
   });
 };
 
 const clearJwtCookie = (res) => {
   res.clearCookie("jwt", { httpOnly: true, secure: false, sameSite: "None" });
+};
+
+const clearUserIdCookie = (res) => {
+  res.clearCookie("UserId", {
+    httpOnly: true,
+    secure: false,
+    sameSite: "None",
+  });
 };
 
 class AuthController {
@@ -23,9 +39,10 @@ class AuthController {
       req.body
     );
     setJwtCookie(res, refreshToken);
+    setUserIdCookie(res, userId.toString());
     new OK({
       message: "Login Success!",
-      metadata: { accessToken, userId },
+      metadata: { accessToken },
     }).send(res);
   };
 
@@ -51,20 +68,26 @@ class AuthController {
   };
 
   refresh = async (req, res, next) => {
-    clearJwtCookie(res);
+    const { cookies } = req;
+    const { jwt, UserId } = cookies;
+    if (!jwt || !UserId) {
+      throw new UnauthorizedError();
+    }
+
     const { accessToken, refreshToken } = await AuthService.handleRefreshToken({
-      user: req.user,
-      refreshToken: req.refreshToken,
+      user: { userId: UserId },
+      refreshToken: jwt,
     });
     setJwtCookie(res, refreshToken);
     new OK({
-      message: "Login Success!",
+      message: "Refesh Token Success!",
       metadata: { accessToken },
     }).send(res);
   };
 
   logOut = async (req, res, next) => {
     clearJwtCookie(res);
+    clearUserIdCookie(res);
     new OK({
       message: "Login Success!",
       metadata: await AuthService.logOut(req.user),

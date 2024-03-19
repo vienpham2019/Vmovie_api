@@ -1,7 +1,7 @@
 "use strict";
 
 const { Schema, model } = require("mongoose"); // Erase if already required
-const { daysToSeconds } = require("../../util");
+const { daysToSeconds, minsToSeconds } = require("../../util");
 
 const DOCUMENT_NAME = "KeyToken";
 const COLLECTION_NAME = "KeyTokens";
@@ -29,7 +29,10 @@ const keytokenSchema = new Schema(
   }
 );
 
-keytokenSchema.index({ updatedAt: 1 }, { expireAfterSeconds: 2 });
+// keytokenSchema.index(
+//   { updatedAt: 1 },
+//   { expireAfterSeconds: minsToSeconds(15) }
+// );
 
 //Export the model
 module.exports = model(DOCUMENT_NAME, keytokenSchema);

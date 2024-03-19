@@ -1,4 +1,5 @@
 const JWT = require("jsonwebtoken");
+const { InternalServerError } = require("../core/error.response");
 
 const createTokenPair = async ({
   payload,
@@ -18,7 +19,7 @@ const createTokenPair = async ({
 
     return { accessToken, refreshToken };
   } catch (error) {
-    return error;
+    throw new InternalServerError(error);
   }
 };
 

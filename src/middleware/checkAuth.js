@@ -5,6 +5,7 @@ const {
 } = require("../core/error.response");
 const { asyncHandler } = require("../helper/asyncHandler");
 const { getKeyTokenByUserId } = require("../model/keyToken/keyToken.repo");
+const JWT = require("jsonwebtoken");
 
 const HEADER = {
   API_KEY: "x-api-key",
@@ -27,37 +28,37 @@ const checkUserRole = (role) => {
 };
 
 const authentication = asyncHandler(async (req, res, next) => {
-  const cookies = req.cookies;
+  const { cookies } = req;
   if (!cookies?.jwt) {
-    throw new UnauthorizedError();
+    throw new UnauthorizedError("No cookie");
   }
-  const userId = req.headers[HEADER.CLIENT_ID];
+
+  const userId = cookies?.UserId;
   if (!userId) {
-    throw new UnauthorizedError();
+    throw new UnauthorizedError("No client id");
   }
 
   // verify access token
   const accessToken = req.headers[HEADER.AUTHORIZATION];
-  if (!accessToken || !accessToken?.startsWith("Bearer ")) {
-    throw new UnauthorizedError();
+  if (!accessToken?.startsWith("Bearer ")) {
+    throw new UnauthorizedError("No access token");
   }
 
   try {
     const keyTokens = await getKeyTokenByUserId({ userId });
     if (!keyTokens) {
-      throw new UnauthorizedError();
+      throw new UnauthorizedError("not found key token");
     }
     // check keyTokens with user id
     const decodeUser = JWT.verify(
       accessToken.split(" ")[1],
-      keyTokens.refreshTokenSecret
+      keyTokens.accessTokenSecret
     );
     if (userId != decodeUser.userId) {
-      throw new UnauthorizedError();
+      throw new UnauthorizedError("User id not match");
     }
     // Ok all then return next
     req.user = decodeUser;
-    req.refreshToken = cookies.jwt;
     return next();
   } catch (error) {
     throw error;

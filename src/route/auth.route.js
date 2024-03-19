@@ -33,11 +33,10 @@ router.post(
   asyncHandler(forgotPassword)
 );
 router.post("/resetPassword", asyncHandler(resetPassword));
+router.get("/refresh", asyncHandler(refresh));
 
 // authentication
 router.use(authentication);
-
-router.get("/refresh", asyncHandler(refresh));
 router.get("/logOut", asyncHandler(logOut));
 
 module.exports = router;

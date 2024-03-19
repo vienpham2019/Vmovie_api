@@ -5,7 +5,7 @@ const keyTokenModel = require("./keyToken.model");
 
 //Get
 const getKeyTokenByUserId = async ({ userId }) => {
-  return await keytokenModel
+  return await keyTokenModel
     .findOne({ userId: convertToObjectIdMongoDB(userId) })
     .lean();
 };
@@ -27,7 +27,7 @@ const createOrUpdateKeyToken = async ({
 //Update
 //Delete
 const deleteKeyTokenById = async (userId) => {
-  return await keytokenModel
+  return await keyTokenModel
     .deleteOne({
       userId: convertToObjectIdMongoDB(userId),
     })
