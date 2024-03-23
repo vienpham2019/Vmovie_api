@@ -13,10 +13,10 @@ const HEADER = {
   AUTHORIZATION: "athorization",
 };
 
-const checkUserRole = (role) => {
+const checkUserRole = (roles) => {
   return asyncHandler(async (req, res, next) => {
     try {
-      const validUserRole = req.user.roles.includes(role);
+      const validUserRole = roles.some((role) => req.user.roles.includes(role));
       if (!validUserRole) {
         throw new BadRequestError("Request denied");
       }

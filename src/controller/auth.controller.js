@@ -1,5 +1,6 @@
 "use strict";
 
+const { UnauthorizedError } = require("../core/error.response");
 const { OK, CREATED } = require("../core/success.response");
 const AuthService = require("../service/auth.service");
 const { daysToMilliseconds } = require("../util");
@@ -22,14 +23,14 @@ const setUserIdCookie = (res, memberId) => {
 };
 
 const clearJwtCookie = (res) => {
-  res.clearCookie("jwt", { httpOnly: true, secure: false, sameSite: "None" });
+  res.clearCookie("jwt", { httpOnly: true, secure: false, sameSite: "Strict" });
 };
 
 const clearUserIdCookie = (res) => {
   res.clearCookie("UserId", {
     httpOnly: true,
     secure: false,
-    sameSite: "None",
+    sameSite: "Strict",
   });
 };
 
@@ -71,7 +72,9 @@ class AuthController {
     const { cookies } = req;
     const { jwt, UserId } = cookies;
     if (!jwt || !UserId) {
-      throw new UnauthorizedError();
+      throw new UnauthorizedError(
+        "Your login session has expired. Please log in again to continue."
+      );
     }
 
     const { accessToken, refreshToken } = await AuthService.handleRefreshToken({
@@ -88,9 +91,10 @@ class AuthController {
   logOut = async (req, res, next) => {
     clearJwtCookie(res);
     clearUserIdCookie(res);
+    const { UserId } = req.cookies;
     new OK({
-      message: "Login Success!",
-      metadata: await AuthService.logOut(req.user),
+      message: "LogOut Success!",
+      metadata: await AuthService.logOut({ userId: UserId }),
     }).send(res);
   };
 }

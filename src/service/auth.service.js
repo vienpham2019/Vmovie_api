@@ -28,6 +28,8 @@ class AuthService {
     const { accessToken, refreshToken } = await createTokenPair({
       payload: {
         userId: foundUser._id,
+        roles: foundUser.roles,
+        username: foundUser.name,
       },
       refreshTokenSecret,
       accessTokenSecret,
@@ -85,7 +87,6 @@ class AuthService {
       _id.toString(),
       minsToSeconds(15)
     );
-    console.log(token);
     // send to user
     return { message: "Send Successful" };
   }
@@ -95,9 +96,9 @@ class AuthService {
     // add refresh token into blacklist
     const refreshTokenSecret = createTokenCode();
     const accessTokenSecret = createTokenCode();
-
+    const foundUser = await getUserById({ _id: userId });
     const { accessToken, refreshToken } = await createTokenPair({
-      payload: { userId },
+      payload: { userId, roles: foundUser.roles, username: foundUser.name },
       refreshTokenSecret,
       accessTokenSecret,
     });

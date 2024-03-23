@@ -5,9 +5,11 @@ const {
 } = require("../core/error.response");
 const { formatFileSize } = require("../util");
 const cloudBucket = require("../db/init.googleCloud");
+const MovieService = require("./movie.service");
 
 class ImageService {
-  static async createImage({ file }) {
+  static async createImage({ user, file, query }) {
+    const { field, db } = query;
     if (!file) {
       throw new BadRequestError("No file uploaded");
     }
@@ -39,13 +41,22 @@ class ImageService {
           // Retrieve metadata of the uploaded file
           const [{ bucket, name, contentType, size }] =
             await blob.getMetadata();
-          const url = `https://storage.cloud.google.com/${bucket}/${name}?authuser=0`;
+          const url = `https://storage.googleapis.com/${bucket}/${name}`;
           const data = {
             name,
             mimeType: contentType,
             size: formatFileSize(size - 0),
             url,
           };
+          switch (db) {
+            case "movie":
+              await MovieService.handleAddMovieImage({
+                user,
+                payload: data,
+                field,
+              });
+              break;
+          }
           resolve(data);
         } catch (error) {
           reject(error);
@@ -56,12 +67,23 @@ class ImageService {
     });
   }
 
-  static async deleteImage({ fileName }) {
+  static async deleteImage({ query, params, user }) {
+    const { fileName } = params;
+    const { field, db } = query;
     try {
       if (!fileName) {
         throw new BadRequestError("No file name");
       }
       await cloudBucket.file(fileName).delete();
+      switch (db) {
+        case "movie":
+          await MovieService.handleRemoveMovieImage({
+            user,
+            fileName,
+            field,
+          });
+          break;
+      }
       return { message: `File ${fileName} deleted successfully` };
     } catch (error) {
       throw new InternalServerError(`Failed to delete file ${fileName}`);

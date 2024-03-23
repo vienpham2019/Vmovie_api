@@ -18,7 +18,6 @@ const {
   forgotPasswordLimiter,
   resendForgotPasswordLimiter,
 } = require("../middleware/checkLimiter");
-const { authentication } = require("../middleware/checkAuth");
 
 router.post("/logIn", loginLimiter, asyncHandler(logIn));
 router.post("/signUp", registerLimiter, asyncHandler(signUp));
@@ -34,9 +33,6 @@ router.post(
 );
 router.post("/resetPassword", asyncHandler(resetPassword));
 router.get("/refresh", asyncHandler(refresh));
-
-// authentication
-router.use(authentication);
 router.get("/logOut", asyncHandler(logOut));
 
 module.exports = router;

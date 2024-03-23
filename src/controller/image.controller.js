@@ -14,7 +14,7 @@ class ImageController {
   deleteImage = async (req, res, next) => {
     new OK({
       message: "Image delete successfully!",
-      metadata: await ImageService.deleteImage(req.params),
+      metadata: await ImageService.deleteImage(req),
     }).send(res);
   };
 }

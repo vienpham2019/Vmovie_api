@@ -6,7 +6,18 @@ const { RatingEnum, GenreEnum } = require("./movie.enum");
 const DOCUMENT_NAME = "Movie";
 const COLLECTION_NAME = "Movies";
 
-// Declare the Schema of the Mongo model
+const pictureSchema = new Schema(
+  {
+    mimeType: String,
+    url: String,
+    size: String,
+    name: String,
+  },
+  {
+    _id: false,
+  }
+);
+
 const movieSchema = new Schema(
   {
     title: String,
@@ -28,7 +39,7 @@ const movieSchema = new Schema(
     runtime: String,
     genre: {
       type: [String],
-      enum: [Object.values(GenreEnum)],
+      enum: Object.values(GenreEnum),
     },
     country: [String],
     language: [String],
@@ -66,7 +77,6 @@ const movieSchema = new Schema(
     isCompleted: {
       type: Boolean,
       default: false,
-      index: true,
       select: false,
     },
     createBy: {
@@ -79,18 +89,6 @@ const movieSchema = new Schema(
   {
     timestamps: true,
     collection: COLLECTION_NAME,
-  }
-);
-
-const pictureSchema = new Schema(
-  {
-    mimeType: String,
-    url: String,
-    size: String,
-    name: String,
-  },
-  {
-    _id: false,
   }
 );
 
