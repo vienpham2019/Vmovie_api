@@ -18,7 +18,11 @@ class ImageService {
       throw new BadRequestError("Only images are allowed");
     }
 
-    if (!["image/jpeg", "image/png", "image/jpg"].includes(file.mimetype)) {
+    if (
+      !["image/jpeg", "image/png", "image/jpg", "image/webp"].includes(
+        file.mimetype
+      )
+    ) {
       throw new BadRequestError(
         `${file.mimetype.split("/")[1]} is not allowed`
       );

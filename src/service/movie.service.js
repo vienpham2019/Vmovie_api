@@ -40,13 +40,26 @@ class MovieService {
   }
 
   static async updateUncompletedMovie({ payload, user }) {
-    try {
-      const { userId } = user;
-      await updateMovieByUserId({ userId, payload });
-      return { message: "" };
-    } catch (error) {
-      throw InternalServerError(error);
+    delete payload["photos"];
+    delete payload["poster"];
+    delete payload["background"];
+    for (const key in payload) {
+      if (
+        payload[key] === "" ||
+        payload[key]?.length === 0 ||
+        Object.keys(payload[key]).length === 0
+      ) {
+        console.log(payload);
+        throw new BadRequestError("All fields are required.");
+      }
     }
+    const { userId } = user;
+    payload["isCompleted"] = true;
+    const movie = await updateMovieByUserId({ userId, payload });
+    if (!movie) {
+      throw new InternalServerError(`Can't update movie`);
+    }
+    return { message: "" };
   }
 
   static async handleAddMovieImage({ user, payload, field }) {

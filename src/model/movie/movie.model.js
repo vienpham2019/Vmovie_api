@@ -31,7 +31,7 @@ const movieSchema = new Schema(
       type: Number,
       default: 0,
     },
-    yearRelease: String,
+    dateRelease: String,
     rating: {
       type: String,
       enum: Object.values(RatingEnum),

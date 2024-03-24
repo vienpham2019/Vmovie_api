@@ -20,7 +20,11 @@ const createMovieByUserId = async ({ userId, unSelect = [] }) => {
   const payload = {
     createBy: convertToObjectIdMongoDB(userId),
   };
-  return await movieModel.create(payload);
+  return await movieModel
+    .create(payload)
+    .select(getUnSelectData(unSelect))
+    .lean()
+    .exec();
 };
 // Update
 const addMoviePhotos = async ({ userId, photo }) => {
