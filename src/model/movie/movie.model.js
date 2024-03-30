@@ -56,12 +56,13 @@ const movieSchema = new Schema(
     producer: [String],
     writer: [String],
     poster: pictureSchema,
-    background: pictureSchema,
+    thumbnail: pictureSchema,
     photos: {
       type: [pictureSchema],
       default: [],
     },
     trailer: String,
+    awards: String,
     isPublished: {
       type: Boolean,
       default: false,
@@ -81,7 +82,7 @@ const movieSchema = new Schema(
     },
     createBy: {
       type: Schema.Types.ObjectId,
-      required: true,
+      // required: true,
       ref: "User",
       select: false,
     },

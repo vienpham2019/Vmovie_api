@@ -8,8 +8,8 @@ const cloudBucket = require("../db/init.googleCloud");
 const MovieService = require("./movie.service");
 
 class ImageService {
-  static async createImage({ user, file, query }) {
-    const { field, db } = query;
+  static async createImage({ file, query }) {
+    const { field, db, id } = query;
     if (!file) {
       throw new BadRequestError("No file uploaded");
     }
@@ -55,7 +55,7 @@ class ImageService {
           switch (db) {
             case "movie":
               await MovieService.handleAddMovieImage({
-                user,
+                movieId: id,
                 payload: data,
                 field,
               });
@@ -71,18 +71,26 @@ class ImageService {
     });
   }
 
-  static async deleteImage({ query, params, user }) {
+  static async deleteImage({ query, params }) {
     const { fileName } = params;
-    const { field, db } = query;
+    const { field, db, id } = query;
     try {
       if (!fileName) {
         throw new BadRequestError("No file name");
       }
-      await cloudBucket.file(fileName).delete();
+
+      const file = cloudBucket.file(fileName);
+
+      await file.exists(async (exists) => {
+        if (exists) {
+          await file.delete();
+        }
+      });
+
       switch (db) {
         case "movie":
           await MovieService.handleRemoveMovieImage({
-            user,
+            movieId: id,
             fileName,
             field,
           });

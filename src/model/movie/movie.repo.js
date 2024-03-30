@@ -1,9 +1,33 @@
 "use strict";
 
-const { convertToObjectIdMongoDB, getUnSelectData } = require("../../util");
+const {
+  convertToObjectIdMongoDB,
+  getUnSelectData,
+  getSelectData,
+  getSkip,
+} = require("../../util");
 const movieModel = require("./movie.model");
 
 // Get
+const getAllMovies = async ({ page, limit, select = [] }) => {
+  return await movieModel
+    .find({ isCompleted: true })
+    .select(getSelectData(select))
+    .sort({ updatedAt: -1 })
+    .skip(getSkip({ page, limit }))
+    .limit(limit)
+    .lean()
+    .exec();
+};
+
+const getMovieById = async ({ movieId, unSelect = [] }) => {
+  return await movieModel
+    .findOne({ _id: convertToObjectIdMongoDB(movieId) })
+    .select(getUnSelectData(unSelect))
+    .lean()
+    .exec();
+};
+
 const getUncompletedMovie = async ({ userId, unSelect = [] }) => {
   const filter = {
     createBy: convertToObjectIdMongoDB(userId),
@@ -26,11 +50,11 @@ const createMovieByUserId = async ({ userId, unSelect = [] }) => {
     .lean()
     .exec();
 };
+
 // Update
-const addMoviePhotos = async ({ userId, photo }) => {
+const addMoviePhotos = async ({ movieId, photo }) => {
   const filter = {
-    createBy: convertToObjectIdMongoDB(userId),
-    isCompleted: false,
+    _id: convertToObjectIdMongoDB(movieId),
   };
   const update = {
     $push: {
@@ -41,10 +65,9 @@ const addMoviePhotos = async ({ userId, photo }) => {
   return await movieModel.findOneAndUpdate(filter, update, options).lean();
 };
 
-const removeMoviePhotos = async ({ userId, fileName }) => {
+const removeMoviePhotos = async ({ movieId, fileName }) => {
   const filter = {
-    createBy: convertToObjectIdMongoDB(userId),
-    isCompleted: false,
+    _id: convertToObjectIdMongoDB(movieId),
   };
   const update = {
     $pull: {
@@ -55,10 +78,9 @@ const removeMoviePhotos = async ({ userId, fileName }) => {
   return await movieModel.findOneAndUpdate(filter, update, options).lean();
 };
 
-const updateMovieByUserId = async ({ userId, payload, unSelect = [] }) => {
+const updateMovieByMovieId = async ({ movieId, payload, unSelect = [] }) => {
   const filter = {
-    createBy: convertToObjectIdMongoDB(userId),
-    isCompleted: false,
+    _id: convertToObjectIdMongoDB(movieId),
   };
   const options = { new: true };
   return await movieModel
@@ -69,9 +91,11 @@ const updateMovieByUserId = async ({ userId, payload, unSelect = [] }) => {
 // Delete
 
 module.exports = {
+  getAllMovies,
   getUncompletedMovie,
+  getMovieById,
   createMovieByUserId,
-  updateMovieByUserId,
+  updateMovieByMovieId,
   addMoviePhotos,
   removeMoviePhotos,
 };
