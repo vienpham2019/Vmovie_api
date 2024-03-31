@@ -56,7 +56,7 @@ fs.readFile("db.json", "utf8", async (err, data) => {
     const jsonData = JSON.parse(data);
 
     // Loop through the contents of the JSON object
-    for (let i = 0; i < 30; i++) {
+    for (let i = 0; i < 54; i++) {
       const movie = jsonData["movies"][i];
       const {
         title,
@@ -76,6 +76,8 @@ fs.readFile("db.json", "utf8", async (err, data) => {
 
       const movieObject = {
         title: title || "Unknown Title",
+        ratingScores: ((Math.random() * 50) / 10).toFixed(1),
+        reviews: Math.floor(Math.random() * 101),
         poster: {
           url: poster_path || "",
           mimeType:
@@ -111,6 +113,18 @@ fs.readFile("db.json", "utf8", async (err, data) => {
         language: Language
           ? Language.split(",").map((language) => language.trim())
           : ["Unknown Language"],
+        producer: ["Unknown Producer"],
+        studio: ["Unknown Studio"],
+        photos: [
+          {
+            url: backdrop_path || "",
+            mimeType:
+              "image/" +
+              backdrop_path.substring(backdrop_path.lastIndexOf(".") + 1),
+            size: "N/A",
+            name: uuidv4(),
+          },
+        ],
         awards: Awards || "N/A",
         trailer: videos.length > 0 ? videos[0]["videoUrl"] : "No Video url",
         isCompleted: true, // Assuming default value for isCompleted

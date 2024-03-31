@@ -97,6 +97,56 @@ class MovieService {
     }
   }
 
+  static async publishedMovie({ movieId }) {
+    try {
+      const movie = await getMovieById({
+        movieId,
+        unSelect: [
+          "_id",
+          "__v",
+          "createBy",
+          "createdAt",
+          "updatedAt",
+          "isCompleted",
+          "isDraft",
+          "isPublished",
+          "ratingScores",
+          "reviews",
+        ],
+      });
+      for (const key in movie) {
+        if (movie.hasOwnProperty(key)) {
+          if (
+            movie[key] === "" ||
+            movie[key]?.length === 0 ||
+            Object.keys(movie[key]).length === 0
+          ) {
+            throw new BadRequestError(
+              `Can't publish movie because some required fields are missing`
+            );
+          }
+        }
+      }
+      return await updateMovieByMovieId({
+        movieId,
+        payload: { isPublished: true, isDraft: false },
+      });
+    } catch (error) {
+      throw new InternalServerError(error);
+    }
+  }
+
+  static async draftMovie({ movieId }) {
+    try {
+      await updateMovieByMovieId({
+        movieId,
+        payload: { isPublished: false, isDraft: true },
+      });
+    } catch (error) {
+      throw new InternalServerError(error);
+    }
+  }
+
   static async updateUncompletedMovie({ payload }) {
     delete payload["photos"];
     delete payload["poster"];
@@ -154,7 +204,9 @@ class MovieService {
       }
       const { photos, poster, thumbnail, isPublished } = foundMovie;
       if (isPublished) {
-        throw new BadRequestError(`Can't delete public movie`);
+        throw new BadRequestError(
+          `Cannot delete movie that is not unpublished`
+        );
       }
       await Promise.all(
         [...photos, poster, thumbnail].map(

@@ -26,6 +26,7 @@ const movieSchema = new Schema(
       default: 0,
       min: 0,
       max: 5,
+      step: 0.1,
     },
     reviews: {
       type: Number,
@@ -92,36 +93,6 @@ const movieSchema = new Schema(
     collection: COLLECTION_NAME,
   }
 );
-
-movieSchema.pre("save", function (next) {
-  const requiredFields = [
-    "title",
-    "rating",
-    "runtime",
-    "releaseDate",
-    "genre",
-    "movieDetail",
-    "cast",
-    "posterUrl",
-    "photoUrls",
-    "videoUrls",
-  ];
-
-  if (this.isPublished) {
-    // Check if any required fields are missing
-    for (const field of requiredFields) {
-      if (!this[field]) {
-        return next(
-          new Error(
-            `The field '${field}' is required when the movie is published`
-          )
-        );
-      }
-    }
-  }
-
-  next();
-});
 
 //Export the model
 module.exports = model(DOCUMENT_NAME, movieSchema);

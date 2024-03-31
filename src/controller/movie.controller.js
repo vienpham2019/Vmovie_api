@@ -25,6 +25,20 @@ class MovieController {
     }).send(res);
   };
 
+  publishedMovie = async (req, res, next) => {
+    new OK({
+      message: "Published movie successfully!",
+      metadata: await MovieService.publishedMovie(req.body),
+    }).send(res);
+  };
+
+  draftMovie = async (req, res, next) => {
+    new OK({
+      message: "Draft movie successfully!",
+      metadata: await MovieService.draftMovie(req.body),
+    }).send(res);
+  };
+
   updateUncompletedMovie = async (req, res, next) => {
     new OK({
       message: "Upload movie successfully!",
