@@ -21,9 +21,11 @@ class MovieService {
     page = 1,
     sortBy = "updatedAt",
     filter = "All",
+    search = "",
     sortDir = 1,
   }) {
-    const query = {};
+    const regex = new RegExp(search, "i"); // "i" flag for case-insensitive matching
+    const query = { title: { $regex: regex } };
     if (filter === "Draft") query["isDraft"] = true;
     else if (filter === "Published") query["isPublished"] = true;
 
