@@ -12,11 +12,21 @@ const movieModel = require("./movie.model");
 const getTotalMovies = async () => {
   return await movieModel.countDocuments();
 };
-const getAllMovies = async ({ page, limit, sortBy, sortDir, select = [] }) => {
-  const totalMovies = await movieModel.countDocuments({ isCompleted: true });
+const getAllMovies = async ({
+  query,
+  page,
+  limit,
+  sortBy,
+  sortDir,
+  select = [],
+}) => {
+  const totalMovies = await movieModel.countDocuments({
+    isCompleted: true,
+    ...query,
+  });
 
   const movies = await movieModel
-    .find({ isCompleted: true })
+    .find({ isCompleted: true, ...query })
     .select(getSelectData(select))
     .sort({ [sortBy]: Math.floor(sortDir) })
     .skip(getSkip({ page, limit }))

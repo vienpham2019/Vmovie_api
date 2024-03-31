@@ -20,10 +20,16 @@ class MovieService {
     limit = 50,
     page = 1,
     sortBy = "updatedAt",
+    filter = "All",
     sortDir = 1,
   }) {
+    const query = {};
+    if (filter === "Draft") query["isDraft"] = true;
+    else if (filter === "Published") query["isPublished"] = true;
+
     try {
       return await getAllMovies({
+        query,
         page,
         limit,
         sortBy,
