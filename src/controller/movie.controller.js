@@ -7,7 +7,7 @@ class MovieController {
   getAllMovieByAdmin = async (req, res, next) => {
     new OK({
       message: "Get movie successfully!",
-      metadata: await MovieService.getAllMovieByAdmin(req),
+      metadata: await MovieService.getAllMovieByAdmin(req.query),
     }).send(res);
   };
 
@@ -32,6 +32,13 @@ class MovieController {
         payload: req.body,
         user: req.user,
       }),
+    }).send(res);
+  };
+
+  deleteMovieById = async (req, res, next) => {
+    new OK({
+      message: "Delete movie successfully!",
+      metadata: await MovieService.deleteMovieById(req.params),
     }).send(res);
   };
 }

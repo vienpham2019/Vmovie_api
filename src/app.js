@@ -56,7 +56,7 @@ fs.readFile("db.json", "utf8", async (err, data) => {
     const jsonData = JSON.parse(data);
 
     // Loop through the contents of the JSON object
-    for (let i = 0; i < 4; i++) {
+    for (let i = 0; i < 30; i++) {
       const movie = jsonData["movies"][i];
       const {
         title,
@@ -112,7 +112,7 @@ fs.readFile("db.json", "utf8", async (err, data) => {
           ? Language.split(",").map((language) => language.trim())
           : ["Unknown Language"],
         awards: Awards || "N/A",
-        trailer: videos.length > 0 ? videos[0]["videoUrl"] : "",
+        trailer: videos.length > 0 ? videos[0]["videoUrl"] : "No Video url",
         isCompleted: true, // Assuming default value for isCompleted
         createBy: convertToObjectIdMongoDB("65f87875325f4b9b8b038132"),
       };

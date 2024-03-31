@@ -8,6 +8,7 @@ const {
   getUncompletedMovie,
   getAllMovieByAdmin,
   getMovieById,
+  deleteMovieById,
 } = require("../controller/movie.controller");
 const { authentication, checkUserRole } = require("../middleware/checkAuth");
 const { UserRoleEnum } = require("../model/user/user.enum");
@@ -19,5 +20,6 @@ router.get("/allMovieByAdmin", asyncHandler(getAllMovieByAdmin));
 router.get("/uncompletedMovie", asyncHandler(getUncompletedMovie));
 
 router.patch("/uncompletedMovie", asyncHandler(updateUncompletedMovie));
+router.delete("/:movieId", asyncHandler(deleteMovieById));
 
 module.exports = router;

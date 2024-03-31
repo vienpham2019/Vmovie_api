@@ -71,6 +71,13 @@ class ImageService {
     });
   }
 
+  static async deleteImageByFileName({ fileName }) {
+    console.log(fileName);
+    const file = cloudBucket.file(fileName);
+    const [exists] = await file.exists();
+    if (exists) await file.delete();
+  }
+
   static async deleteImage({ query, params }) {
     const { fileName } = params;
     const { field, db, id } = query;
@@ -79,13 +86,7 @@ class ImageService {
         throw new BadRequestError("No file name");
       }
 
-      const file = cloudBucket.file(fileName);
-
-      await file.exists(async (exists) => {
-        if (exists) {
-          await file.delete();
-        }
-      });
+      await this.deleteImageByFileName({ fileName });
 
       switch (db) {
         case "movie":

@@ -9,15 +9,25 @@ const {
 const movieModel = require("./movie.model");
 
 // Get
-const getAllMovies = async ({ page, limit, select = [] }) => {
-  return await movieModel
+const getTotalMovies = async () => {
+  return await movieModel.countDocuments();
+};
+const getAllMovies = async ({ page, limit, sortBy, sortDir, select = [] }) => {
+  const totalMovies = await movieModel.countDocuments({ isCompleted: true });
+
+  const movies = await movieModel
     .find({ isCompleted: true })
     .select(getSelectData(select))
-    .sort({ updatedAt: -1 })
+    .sort({ [sortBy]: Math.floor(sortDir) })
     .skip(getSkip({ page, limit }))
     .limit(limit)
     .lean()
     .exec();
+
+  return {
+    totalMovies,
+    movies,
+  };
 };
 
 const getMovieById = async ({ movieId, unSelect = [] }) => {
@@ -90,7 +100,12 @@ const updateMovieByMovieId = async ({ movieId, payload, unSelect = [] }) => {
 };
 // Delete
 
+const deleteMovieById = async ({ movieId }) => {
+  return await movieModel.deleteOne({ _id: convertToObjectIdMongoDB(movieId) });
+};
+
 module.exports = {
+  getTotalMovies,
   getAllMovies,
   getUncompletedMovie,
   getMovieById,
@@ -98,4 +113,5 @@ module.exports = {
   updateMovieByMovieId,
   addMoviePhotos,
   removeMoviePhotos,
+  deleteMovieById,
 };
