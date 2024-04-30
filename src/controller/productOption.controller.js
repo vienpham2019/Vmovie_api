@@ -44,6 +44,13 @@ class ProductOptionController {
       metadata: await ProductOptionService.deleteProductOptionById(req.params),
     }).send(res);
   };
+
+  deleteAllProductOptionByType = async (req, res, next) => {
+    new OK({
+      message: "Delete All Product Option successfully!",
+      metadata: await ProductOptionService.deleteAllOptionByType(req.params),
+    }).send(res);
+  };
 }
 
 module.exports = new ProductOptionController();

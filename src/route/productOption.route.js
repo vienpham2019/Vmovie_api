@@ -13,6 +13,7 @@ const {
   getAllOptionsByType,
   updateProductOption,
   deleteProductOptionById,
+  deleteAllProductOptionByType,
 } = require("../controller/productOption.controller");
 
 router.get("/types", asyncHandler(getAllProductOptionTypes));
@@ -24,6 +25,7 @@ router.post("/createOption", asyncHandler(createProductOption));
 router.patch("/updateOption", asyncHandler(updateProductOption));
 router.post("/createSubOption", asyncHandler(createProductSubOption));
 
+router.delete("/allType/:type", asyncHandler(deleteAllProductOptionByType));
 router.delete("/:_id", asyncHandler(deleteProductOptionById));
 
 module.exports = router;

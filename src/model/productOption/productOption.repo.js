@@ -33,6 +33,17 @@ const getAllOptionTypes = async () => {
     throw new InternalServerError(error);
   }
 };
+
+const getAllSubOptionTypes = async () => {
+  try {
+    return await productOptionModel.find(
+      { isParent: false }, // Filter criteria
+      getSelectData(["optionType", "parentType"]) // Projection
+    );
+  } catch (error) {
+    throw new InternalServerError(error);
+  }
+};
 // Create
 const createProductOption = async ({ payload, unSelect = [] }) => {
   try {
@@ -63,6 +74,7 @@ const deleteProductOptionById = async ({ _id }) => {
 
 module.exports = {
   getOptionByQuery,
+  getAllSubOptionTypes,
   getAllProductOptionsByType,
   getAllOptionTypes,
   createProductOption,

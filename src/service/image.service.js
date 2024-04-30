@@ -72,7 +72,6 @@ class ImageService {
   }
 
   static async deleteImageByFileName({ fileName }) {
-    console.log(fileName);
     const file = cloudBucket.file(fileName);
     const [exists] = await file.exists();
     if (exists) await file.delete();
