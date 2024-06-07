@@ -44,6 +44,15 @@ const getAllSubOptionTypes = async () => {
     throw new InternalServerError(error);
   }
 };
+
+const checkOptionTypeExists = async (optionType) => {
+  try {
+    const existingOption = await productOptionModel.findOne({ optionType });
+    return !!existingOption;
+  } catch (error) {
+    throw new InternalServerError(error);
+  }
+};
 // Create
 const createProductOption = async ({ payload, unSelect = [] }) => {
   try {
@@ -73,6 +82,7 @@ const deleteProductOptionById = async ({ _id }) => {
 };
 
 module.exports = {
+  checkOptionTypeExists,
   getOptionByQuery,
   getAllSubOptionTypes,
   getAllProductOptionsByType,

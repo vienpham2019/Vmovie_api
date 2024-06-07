@@ -5,6 +5,12 @@ const ProductOptionService = require("../service/productOption.service");
 
 class ProductOptionController {
   // Get
+  isOptionTypeExists = async (req, res, next) => {
+    new OK({
+      message: "Get all options type successfully!",
+      metadata: await ProductOptionService.isOptionTypeExists(req.params),
+    }).send(res);
+  };
   getAllOptionsByType = async (req, res, next) => {
     new OK({
       message: "Get all options type successfully!",

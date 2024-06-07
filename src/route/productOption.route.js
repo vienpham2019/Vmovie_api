@@ -14,12 +14,15 @@ const {
   updateProductOption,
   deleteProductOptionById,
   deleteAllProductOptionByType,
+  isOptionTypeExists,
 } = require("../controller/productOption.controller");
 
 router.get("/types", asyncHandler(getAllProductOptionTypes));
 router.get("/options/:type", asyncHandler(getAllOptionsByType));
+
 router.use(authentication);
 router.use(checkUserRole([UserRoleEnum.ADMIN]));
+router.post("/isOptionTypeExists/:type", asyncHandler(isOptionTypeExists));
 
 router.post("/createOption", asyncHandler(createProductOption));
 router.patch("/updateOption", asyncHandler(updateProductOption));

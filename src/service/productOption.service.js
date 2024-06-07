@@ -6,6 +6,9 @@ const {
 } = require("../core/error.response");
 const cloudBucket = require("../db/init.googleCloud");
 const {
+  deleteOptionIdFromAllProducts,
+} = require("../model/product/product.repo");
+const {
   createProductOption,
   deleteProductOptionById,
   getAllOptionTypes,
@@ -13,6 +16,7 @@ const {
   getOptionByQuery,
   updateProductOption,
   getAllSubOptionTypes,
+  checkOptionTypeExists,
 } = require("../model/productOption/productOption.repo");
 const { removeUndefinedNull } = require("../util");
 
@@ -47,10 +51,19 @@ class ProductOptionService {
       throw new InternalServerError(error);
     }
   }
+
+  static async isOptionTypeExists({ type }) {
+    try {
+      return checkOptionTypeExists(type);
+    } catch (error) {
+      throw new InternalServerError(error);
+    }
+  }
   // Create
   static async createProductOption(payload) {
     try {
       const { optionType, name } = payload;
+
       const foundOption = await getOptionByQuery({
         query: { optionType, name },
       });
@@ -69,6 +82,7 @@ class ProductOptionService {
 
   static async createProductSubOption(payload) {
     try {
+      console.log(payload);
       const unSelect = ["updatedAt", "createdAt", "__v"];
       return createProductOption({ payload, unSelect });
     } catch (error) {
@@ -107,7 +121,8 @@ class ProductOptionService {
         });
       }
 
-      deleteProductOptionById({ _id });
+      await deleteProductOptionById({ _id });
+      await deleteOptionIdFromAllProducts({ optionId: _id });
       return;
     } catch (error) {
       throw new InternalServerError(error);
@@ -127,6 +142,7 @@ class ProductOptionService {
             });
           }
           await deleteProductOptionById({ _id: option._id });
+          await deleteOptionIdFromAllProducts({ optionId: option._id });
         })
       );
 
