@@ -5,6 +5,12 @@ const TheaterService = require("../service/theater.service");
 
 class TheaterController {
   // get
+  getTheaterDetails = async (req, res, next) => {
+    new OK({
+      message: "Get product details successfully!",
+      metadata: await TheaterService.getTheaterDetails(req.params),
+    }).send(res);
+  };
   getAllTheaterByAdmin = async (req, res, next) => {
     new OK({
       message: "Get theater successfully!",
@@ -19,7 +25,24 @@ class TheaterController {
     }).send(res);
   };
   // update
+  updateTheater = async (req, res, next) => {
+    new OK({
+      message: "Update Theater successfully!",
+      metadata: await TheaterService.updateTheater({
+        payload: req.body,
+        _id: req.params._id,
+      }),
+    }).send(res);
+  };
   // delete
+  deleteTheaterById = async (req, res, next) => {
+    new OK({
+      message: "Delete Theater successfully!",
+      metadata: await TheaterService.deleteTheaterById({
+        _id: req.params._id,
+      }),
+    }).send(res);
+  };
 }
 
 module.exports = new TheaterController();

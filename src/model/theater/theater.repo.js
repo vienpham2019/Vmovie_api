@@ -1,18 +1,28 @@
 "use strict";
 
 const { InternalServerError } = require("../../core/error.response");
-const { getSelectData, getUnSelectData, getSkip } = require("../../util");
+const {
+  getSelectData,
+  getUnSelectData,
+  getSkip,
+  convertToObjectIdMongoDB,
+} = require("../../util");
 const theaterModel = require("./theater.model");
 
 // Get
-const getAllTheaters = async ({
-  query,
-  page,
-  limit,
-  sortBy,
-  sortDir,
-  select = [],
-}) => {
+const getTheaterDetails = async ({ _id, unSelect }) => {
+  try {
+    return await theaterModel
+      .findById(convertToObjectIdMongoDB(_id))
+      .select(getUnSelectData(unSelect))
+      .lean()
+      .exec();
+  } catch (error) {
+    throw new InternalServerError(error);
+  }
+};
+
+const getAllTheaters = async ({ query, page, limit, select = [] }) => {
   const totalTheaters = await theaterModel.countDocuments({
     ...query,
   });
@@ -20,7 +30,6 @@ const getAllTheaters = async ({
   const theaters = await theaterModel
     .find({ ...query })
     .select(getSelectData(select))
-    .sort({ [sortBy]: Math.floor(sortDir) })
     .skip(getSkip({ page, limit }))
     .limit(limit)
     .lean()
@@ -49,6 +58,30 @@ const createTheater = async ({ payload }) => {
 };
 
 // Update
+const updateTheater = async ({ payload, _id, unSelect = [] }) => {
+  try {
+    return await theaterModel
+      .findOneAndUpdate({ _id: convertToObjectIdMongoDB(_id) }, payload)
+      .select(getUnSelectData(unSelect))
+      .lean();
+  } catch (error) {
+    throw new InternalServerError(error);
+  }
+};
 // Delete
+const deleteTheaterById = async ({ _id }) => {
+  try {
+    return await theaterModel.findByIdAndDelete(_id);
+  } catch (error) {
+    throw new InternalServerError(error);
+  }
+};
 
-module.exports = { getAllTheaters, createTheater, findTheaterByName };
+module.exports = {
+  getTheaterDetails,
+  getAllTheaters,
+  createTheater,
+  updateTheater,
+  findTheaterByName,
+  deleteTheaterById,
+};

@@ -8,17 +8,26 @@ const {
   createTheater,
   findTheaterByName,
   getAllTheaters,
+  updateTheater,
+  deleteTheaterById,
+  getTheaterDetails,
 } = require("../model/theater/theater.repo");
+const { convertToObjectIdMongoDB } = require("../util");
 
 class TheaterService {
   // Get
-  static async getAllTheaterByAdmin({
-    limit = 50,
-    page = 1,
-    sortBy = "updatedAt",
-    search = "",
-    sortDir = 1,
-  }) {
+  static async getTheaterDetails({ _id }) {
+    try {
+      return await getTheaterDetails({
+        _id,
+        unSelect: ["updatedAt", "createdAt", "__v"],
+      });
+    } catch (error) {
+      throw new InternalServerError(error);
+    }
+  }
+
+  static async getAllTheaterByAdmin({ limit = 20, page = 1, search = "" }) {
     const regex = new RegExp(search, "i"); // "i" flag for case-insensitive matching
     const query = {
       name: { $regex: regex },
@@ -29,8 +38,6 @@ class TheaterService {
         query,
         page,
         limit,
-        sortBy,
-        sortDir,
         select: ["_id", "updatedAt", "createdAt", "name", "grid"],
       });
     } catch (error) {
@@ -57,7 +64,36 @@ class TheaterService {
     }
   }
   // Update
+  static async updateTheater({ payload, _id }) {
+    try {
+      if (!payload.name) {
+        throw new BadRequestError("Name is required");
+      }
+      if (!payload?.grid.length) {
+        throw new BadRequestError("Grid is required");
+      }
+      const foundTheater = await findTheaterByName(payload.name);
+
+      if (foundTheater && _id !== foundTheater._id.toString()) {
+        throw new BadRequestError(`Theater with name: ${payload.name} exists`);
+      }
+      return await updateTheater({
+        payload,
+        _id,
+        unSelect: ["__v", "updatedAt", "createdAt"],
+      });
+    } catch (error) {
+      throw new InternalServerError(error);
+    }
+  }
   // Delete
+  static async deleteTheaterById({ _id }) {
+    try {
+      return deleteTheaterById({ _id });
+    } catch (error) {
+      throw new InternalServerError(error);
+    }
+  }
 }
 
 module.exports = TheaterService;
