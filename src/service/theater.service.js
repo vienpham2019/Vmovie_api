@@ -12,7 +12,6 @@ const {
   deleteTheaterById,
   getTheaterDetails,
 } = require("../model/theater/theater.repo");
-const { convertToObjectIdMongoDB } = require("../util");
 
 class TheaterService {
   // Get

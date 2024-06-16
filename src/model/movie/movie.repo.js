@@ -48,6 +48,14 @@ const getMovieById = async ({ movieId, unSelect = [] }) => {
     .exec();
 };
 
+const getPublicMovieById = async ({ movieId, unSelect = [] }) => {
+  return await movieModel
+    .findOne({ _id: convertToObjectIdMongoDB(movieId), isPublished: true })
+    .select(getUnSelectData(unSelect))
+    .lean()
+    .exec();
+};
+
 const getUncompletedMovie = async ({ userId, unSelect = [] }) => {
   const filter = {
     createBy: convertToObjectIdMongoDB(userId),
@@ -119,6 +127,7 @@ module.exports = {
   getAllMovies,
   getUncompletedMovie,
   getMovieById,
+  getPublicMovieById,
   createMovieByUserId,
   updateMovieByMovieId,
   addMoviePhotos,

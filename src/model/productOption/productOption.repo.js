@@ -54,7 +54,7 @@ const checkOptionTypeExists = async (optionType) => {
   }
 };
 // Create
-const createProductOption = async ({ payload, unSelect = [] }) => {
+const createProductOption = async ({ payload }) => {
   try {
     return await productOptionModel.create(payload);
   } catch (error) {

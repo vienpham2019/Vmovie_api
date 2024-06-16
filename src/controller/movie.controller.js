@@ -11,6 +11,13 @@ class MovieController {
     }).send(res);
   };
 
+  getAllPublicMovieByAdmin = async (req, res, next) => {
+    new OK({
+      message: "Get movie successfully!",
+      metadata: await MovieService.getAllPublicMovieByAdmin(req.query),
+    }).send(res);
+  };
+
   getMovieById = async (req, res, next) => {
     new OK({
       message: "Get movie successfully!",

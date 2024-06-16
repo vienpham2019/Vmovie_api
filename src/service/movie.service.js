@@ -52,6 +52,40 @@ class MovieService {
     }
   }
 
+  static async getAllPublicMovieByAdmin({
+    limit = 50,
+    page = 1,
+    sortBy = "updatedAt",
+    search = "",
+    sortDir = 1,
+  }) {
+    const regex = new RegExp(search, "i"); // "i" flag for case-insensitive matching
+    const query = { title: { $regex: regex } };
+    query["isPublished"] = true;
+
+    try {
+      return await getAllMovies({
+        query,
+        page,
+        limit,
+        sortBy,
+        sortDir,
+        select: [
+          "_id",
+          "ratingScores",
+          "isPublished",
+          "updatedAt",
+          "createdAt",
+          "poster",
+          "title",
+          "runtime",
+        ],
+      });
+    } catch (error) {
+      throw new InternalServerError(error);
+    }
+  }
+
   static async getMovieById({ movieId }) {
     try {
       return await getMovieById({

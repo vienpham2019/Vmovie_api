@@ -10,5 +10,6 @@ router.use("/movie", require("./movie.route"));
 router.use("/product", require("./product.route"));
 router.use("/productOption", require("./productOption.route"));
 router.use("/theater", require("./theater.route"));
+router.use("/showtime", require("./showtime.route"));
 
 module.exports = router;

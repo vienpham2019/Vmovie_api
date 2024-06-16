@@ -48,6 +48,14 @@ const findTheaterByName = async (name) => {
     throw new InternalServerError(error);
   }
 };
+
+const findTheaterById = async (_id) => {
+  try {
+    return await theaterModel.findById(_id);
+  } catch (error) {
+    throw new InternalServerError(error);
+  }
+};
 // Create
 const createTheater = async ({ payload }) => {
   try {
@@ -84,4 +92,5 @@ module.exports = {
   updateTheater,
   findTheaterByName,
   deleteTheaterById,
+  findTheaterById,
 };
