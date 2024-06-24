@@ -10,12 +10,87 @@ const {
   createShowtime,
   getShowTimeById,
   deleteShowtime,
+  getShowtimeCountByMovieAndDate,
+  getAllShowtime,
 } = require("../model/showtime/showtime.repo");
 const { findTheaterByName } = require("../model/theater/theater.repo");
 const { isTimeBetween } = require("../util");
 
 class ShowtimeService {
   // Get
+
+  static async getAllShowtimeByAdmin({
+    limit = 20,
+    page = 1,
+    sortBy = "updatedAt",
+    search = "",
+    sortDir = 1,
+  }) {
+    const regex = new RegExp(search, "i"); // "i" flag for case-insensitive matching
+
+    const searchQuery = {
+      "movieDetails.title": { $regex: regex },
+    };
+
+    if (sortBy === "movieDetails") {
+      sortBy = "movieDetails.title";
+    } else if (sortBy === "theaterDetails") {
+      sortBy = "theaterDetails.name";
+    }
+
+    try {
+      return await getAllShowtime({
+        page,
+        limit,
+        sortBy,
+        sortDir,
+        search: searchQuery,
+      });
+    } catch (error) {
+      throw new InternalServerError(error);
+    }
+  }
+
+  static async getAllShowtime({
+    limit = 20,
+    page = 1,
+    sortBy = "updatedAt",
+    search = "",
+    sortDir = 1,
+  }) {
+    const regex = new RegExp(search, "i"); // "i" flag for case-insensitive matching
+
+    const searchQuery = {
+      "movieDetails.title": { $regex: regex },
+      "movieDetails.isPublished": true,
+    };
+
+    if (sortBy === "movieDetails") {
+      sortBy = "movieDetails.title";
+    } else if (sortBy === "theaterDetails") {
+      sortBy = "theaterDetails.name";
+    }
+
+    try {
+      return await getAllShowtime({
+        page,
+        limit,
+        sortBy,
+        sortDir,
+        search: searchQuery,
+      });
+    } catch (error) {
+      throw new InternalServerError(error);
+    }
+  }
+
+  static async getShowtimeCountByMovieAndDate({ movieId }) {
+    try {
+      return await getShowtimeCountByMovieAndDate(movieId);
+    } catch (error) {
+      throw new InternalServerError(error);
+    }
+  }
   static async getAllShowtimeTimeline({ theaterName, date }) {
     try {
       const foundTheater = await findTheaterByName(theaterName);
@@ -98,6 +173,9 @@ class ShowtimeService {
   // Delete
   static async deleteShowtime(_id) {
     try {
+      if (!_id) {
+        throw new BadRequestError("Invalid id");
+      }
       return await deleteShowtime(_id);
     } catch (error) {
       throw new InternalServerError(error);

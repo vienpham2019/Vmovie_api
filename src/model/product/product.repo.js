@@ -8,6 +8,7 @@ const {
   getUnSelectData,
 } = require("../../util");
 const productModel = require("./product.model");
+const { InternalServerError } = require("../../core/error.response");
 
 // Get
 const getAllProducts = async ({
@@ -45,7 +46,7 @@ const getAllTypes = async () => {
   }
 };
 
-const getProductDetails = async ({ _id, unSelect }) => {
+const getProductDetails = async ({ _id, unSelect = [] }) => {
   try {
     return await productModel
       .findById(convertToObjectIdMongoDB(_id))

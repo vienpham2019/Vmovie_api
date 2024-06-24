@@ -10,11 +10,20 @@ const {
   getAllShowtimeTimeline,
   createShowtime,
   deleteShowtime,
+  getShowtimeCountByMovieAndDate,
+  getAllShowtime,
+  getAllShowtimeByAdmin,
 } = require("../controller/showtime.controller");
 
+router.get("/all", asyncHandler(getAllShowtime));
 router.use(authentication);
 router.use(checkUserRole([UserRoleEnum.ADMIN]));
+router.get("/allByAdmin", asyncHandler(getAllShowtimeByAdmin));
 router.get("/timeline", asyncHandler(getAllShowtimeTimeline));
+router.get(
+  "/countShowtimeDay/:movieId",
+  asyncHandler(getShowtimeCountByMovieAndDate)
+);
 router.post("/new", asyncHandler(createShowtime));
 router.delete("/:_id", asyncHandler(deleteShowtime));
 

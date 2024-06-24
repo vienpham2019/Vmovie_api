@@ -3,6 +3,28 @@ const { OK } = require("../core/success.response");
 const ShowtimeService = require("../service/showtime.service");
 
 class ShowtimeController {
+  getAllShowtime = async (req, res, next) => {
+    new OK({
+      message: "Get showtime successfully!",
+      metadata: await ShowtimeService.getAllShowtime(req.query),
+    }).send(res);
+  };
+
+  getAllShowtimeByAdmin = async (req, res, next) => {
+    new OK({
+      message: "Get showtime successfully!",
+      metadata: await ShowtimeService.getAllShowtimeByAdmin(req.query),
+    }).send(res);
+  };
+
+  getShowtimeCountByMovieAndDate = async (req, res, next) => {
+    new OK({
+      message: "Get showtime day count successfully!",
+      metadata: await ShowtimeService.getShowtimeCountByMovieAndDate(
+        req.params
+      ),
+    }).send(res);
+  };
   getAllShowtimeTimeline = async (req, res, next) => {
     new OK({
       message: "Get all showtime successfully!",

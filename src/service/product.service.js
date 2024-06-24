@@ -1,6 +1,10 @@
 "use strict";
 
 const {
+  BadRequestError,
+  InternalServerError,
+} = require("../core/error.response");
+const {
   getAllTypes,
   createProduct,
   getAllProducts,
@@ -80,6 +84,10 @@ class ProductService {
   // Update
   static async updateProduct({ payload, _id }) {
     try {
+      const foundProduct = await getProductDetails({ _id });
+      if (!foundProduct) {
+        throw new BadRequestError("Product not found");
+      }
       return updateProduct({ _id, payload });
     } catch (error) {
       throw new InternalServerError(error);
@@ -89,7 +97,11 @@ class ProductService {
   // Delete
   static async deleteProductById({ _id }) {
     try {
-      return deleteProductById({ _id });
+      const foundProduct = await getProductDetails({ _id });
+      if (!foundProduct) {
+        throw new BadRequestError("Product not found");
+      }
+      return await deleteProductById({ _id });
     } catch (error) {
       throw new InternalServerError(error);
     }
