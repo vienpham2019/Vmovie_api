@@ -1,10 +1,30 @@
 "use strict";
 
 const { InternalServerError } = require("../../core/error.response");
-const { getSkip } = require("../../util");
+const {
+  getSkip,
+  convertToObjectIdMongoDB,
+  getUnSelectData,
+} = require("../../util");
 const reviewModel = require("./review.model");
 
 // Get
+const getReviewDetails = async ({ _id, unSelect = ["__v"] }) => {
+  try {
+    return await reviewModel
+      .findById(convertToObjectIdMongoDB(_id))
+      .populate({
+        path: "movieId",
+        select: "title poster runtime",
+      })
+      .select(getUnSelectData(unSelect))
+      .lean()
+      .exec();
+  } catch (error) {
+    throw new InternalServerError(error);
+  }
+};
+
 const getAllReviews = async ({
   page,
   limit,
@@ -76,14 +96,40 @@ const createReview = async ({ payload }) => {
   try {
     return await reviewModel.create(payload);
   } catch (error) {
-    console.log(error);
     throw new InternalServerError(error);
   }
 };
 // Update
+const updateReview = async ({ _id, payload, unSelect = ["__v"] }) => {
+  try {
+    return await reviewModel
+      .findOneAndUpdate(
+        {
+          _id: convertToObjectIdMongoDB(_id),
+        },
+        payload
+      )
+      .select(getUnSelectData(unSelect))
+      .lean();
+  } catch (error) {
+    throw new InternalServerError(error);
+  }
+};
 // Delete
+const deleteReview = async (_id) => {
+  try {
+    return await reviewModel.findOneAndDelete({
+      _id: convertToObjectIdMongoDB(_id),
+    });
+  } catch (error) {
+    throw new InternalServerError(error);
+  }
+};
 
 module.exports = {
+  getReviewDetails,
   getAllReviews,
   createReview,
+  updateReview,
+  deleteReview,
 };
