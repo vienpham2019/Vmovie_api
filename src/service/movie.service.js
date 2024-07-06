@@ -14,6 +14,7 @@ const {
   getMovieById,
   deleteMovieById,
 } = require("../model/movie/movie.repo");
+const { getReviewByMovieId } = require("../model/review/review.repo");
 
 class MovieService {
   static async getAllMovieByAdmin({
@@ -44,7 +45,9 @@ class MovieService {
           "createdAt",
           "poster",
           "title",
-          "reviews",
+          "IMDBScore",
+          "RottenTomatoesScore",
+          "TMDBScore",
         ],
       });
     } catch (error) {
@@ -88,7 +91,7 @@ class MovieService {
 
   static async getMovieById({ movieId }) {
     try {
-      return await getMovieById({
+      const movie = await getMovieById({
         movieId,
         unSelect: [
           "__v",
@@ -98,10 +101,14 @@ class MovieService {
           "isCompleted",
           "isDraft",
           "isPublished",
-          "ratingScores",
-          "reviews",
         ],
       });
+      if (!movie) {
+        throw new BadRequestError("Movie not found");
+      }
+      const reviews = await getReviewByMovieId({ movieId });
+
+      return { movie, reviews };
     } catch (error) {
       throw new InternalServerError(error);
     }
@@ -184,9 +191,9 @@ class MovieService {
   }
 
   static async updateUncompletedMovie({ payload }) {
-    delete payload["photos"];
-    delete payload["poster"];
-    delete payload["background"];
+    // delete payload["photos"];
+    // delete payload["poster"];
+    // delete payload["background"];
     const movieId = payload["_id"];
     delete payload["_id"];
     for (const key in payload) {

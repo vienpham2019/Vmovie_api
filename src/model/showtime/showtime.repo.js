@@ -76,6 +76,112 @@ const getAllShowtime = async ({ page, limit, sortBy, sortDir, search }) => {
   }
 };
 
+const getAllShowtimeByDate = async ({ date }) => {
+  try {
+    const results = await showtimeModel.aggregate([
+      {
+        $match: { date },
+      },
+      {
+        $lookup: {
+          from: "Movies", // Name of the movie collection
+          localField: "movieId",
+          foreignField: "_id",
+          as: "movieDetails",
+        },
+      },
+      {
+        $unwind: "$movieDetails",
+      },
+      {
+        $group: {
+          _id: {
+            movieId: "$movieId",
+            title: "$movieDetails.title",
+            runtime: "$movieDetails.runtime",
+            rating: "$movieDetails.rating",
+            posterUrl: "$movieDetails.poster.url",
+            trailer: "$movieDetails.trailer",
+          },
+          showtimes: {
+            $push: {
+              startTime: "$startTime",
+            },
+          },
+        },
+      },
+      {
+        $project: {
+          _id: 0,
+          movieId: "$_id.movieId",
+          title: "$_id.title",
+          runtime: "$_id.runtime",
+          rating: "$_id.rating",
+          posterUrl: "$_id.posterUrl",
+          trailer: "$_id.trailer",
+          showtimes: 1,
+        },
+      },
+    ]);
+
+    return results;
+  } catch (error) {
+    throw new InternalServerError(error);
+  }
+};
+
+const getAllShowtimeByMovieId = async ({ movieId }) => {
+  try {
+    const results = await showtimeModel.aggregate([
+      {
+        $match: { movieId: convertToObjectIdMongoDB(movieId) }, // Match the specified movieId
+      },
+      {
+        $group: {
+          _id: "$date",
+          showtimes: { $push: "$startTime" },
+        },
+      },
+      {
+        $project: {
+          _id: 0,
+          date: "$_id",
+          showtimes: 1,
+        },
+      },
+      {
+        $sort: { date: 1 }, // Optional: Sort by date
+      },
+    ]);
+
+    return results;
+  } catch (error) {
+    throw new InternalServerError(error);
+  }
+};
+
+const getAllShowtimeDates = async () => {
+  try {
+    const dates = await showtimeModel.aggregate([
+      {
+        $group: {
+          _id: "$date",
+        },
+      },
+      {
+        $project: {
+          _id: 0,
+          date: "$_id",
+        },
+      },
+    ]);
+
+    return dates;
+  } catch (error) {
+    throw new InternalServerError(error);
+  }
+};
+
 const getShowtimeCountByMovieAndDate = async (movieId) => {
   const results = await showtimeModel.aggregate([
     {
@@ -179,7 +285,10 @@ const deleteShowtime = async ({ _id }) => {
 
 module.exports = {
   getAllShowtime,
+  getAllShowtimeDates,
+  getAllShowtimeByMovieId,
   getShowtimeCountByMovieAndDate,
+  getAllShowtimeByDate,
   getAllShowTimeByQuery,
   createShowtime,
   getShowTimeById,

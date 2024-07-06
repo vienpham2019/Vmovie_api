@@ -12,12 +12,37 @@ const {
   deleteShowtime,
   getShowtimeCountByMovieAndDate,
   getAllShowtime,
+  getAllShowtimeDates,
+  getAllShowtimeByDate,
+  getAllShowtimeByMovieId,
 } = require("../model/showtime/showtime.repo");
 const { findTheaterByName } = require("../model/theater/theater.repo");
 const { isTimeBetween } = require("../util");
 
 class ShowtimeService {
   // Get
+  static async getAllShowtimeDates() {
+    try {
+      return await getAllShowtimeDates();
+    } catch (error) {
+      throw new InternalServerError(error);
+    }
+  }
+  static async getAllShowtimeByDate({ date }) {
+    try {
+      return await getAllShowtimeByDate({ date: date.split("-").join("/") });
+    } catch (error) {
+      throw new InternalServerError(error);
+    }
+  }
+
+  static async getAllShowtimeByMovieId({ movieId }) {
+    try {
+      return await getAllShowtimeByMovieId({ movieId });
+    } catch (error) {
+      throw new InternalServerError(error);
+    }
+  }
 
   static async getAllShowtimeByAdmin({
     limit = 20,

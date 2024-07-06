@@ -13,11 +13,17 @@ const {
   getShowtimeCountByMovieAndDate,
   getAllShowtime,
   getAllShowtimeByAdmin,
+  getAllShowtimeDates,
+  getAllShowtimeByDate,
+  getAllShowtimeByMovieId,
 } = require("../controller/showtime.controller");
 
-router.get("/all", asyncHandler(getAllShowtime));
+router.get("/allDates", asyncHandler(getAllShowtimeDates));
+router.get("/all/:date", asyncHandler(getAllShowtimeByDate));
+router.get("/allByMovie/:movieId", asyncHandler(getAllShowtimeByMovieId));
 router.use(authentication);
 router.use(checkUserRole([UserRoleEnum.ADMIN]));
+router.get("/all", asyncHandler(getAllShowtime));
 router.get("/allByAdmin", asyncHandler(getAllShowtimeByAdmin));
 router.get("/timeline", asyncHandler(getAllShowtimeTimeline));
 router.get(

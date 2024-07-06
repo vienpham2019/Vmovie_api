@@ -30,6 +30,19 @@ const showtimeSchema = new Schema(
       type: String,
       required: true,
     },
+    takenSeats: [{ type: String, default: [] }],
+    generalAdmissionPrice: {
+      type: Number,
+      default: 5,
+    },
+    childPrice: {
+      type: Number,
+      default: 5,
+    },
+    seniorPrice: {
+      type: Number,
+      default: 5,
+    },
   },
   {
     timestamps: true,

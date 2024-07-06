@@ -10,6 +10,27 @@ class ShowtimeController {
     }).send(res);
   };
 
+  getAllShowtimeDates = async (req, res, next) => {
+    new OK({
+      message: "Get showtime dates successfully!",
+      metadata: await ShowtimeService.getAllShowtimeDates(),
+    }).send(res);
+  };
+
+  getAllShowtimeByDate = async (req, res, next) => {
+    new OK({
+      message: "Get showtime by date successfully!",
+      metadata: await ShowtimeService.getAllShowtimeByDate(req.params),
+    }).send(res);
+  };
+
+  getAllShowtimeByMovieId = async (req, res, next) => {
+    new OK({
+      message: "Get showtime by movieId successfully!",
+      metadata: await ShowtimeService.getAllShowtimeByMovieId(req.params),
+    }).send(res);
+  };
+
   getAllShowtimeByAdmin = async (req, res, next) => {
     new OK({
       message: "Get showtime successfully!",

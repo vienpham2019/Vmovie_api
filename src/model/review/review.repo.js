@@ -25,6 +25,21 @@ const getReviewDetails = async ({ _id, unSelect = ["__v"] }) => {
   }
 };
 
+const getReviewByMovieId = async ({
+  movieId,
+  unSelect = ["__v", "_id", "updatedAt", "createdAt"],
+}) => {
+  try {
+    return await reviewModel
+      .find({ movieId })
+      .select(getUnSelectData(unSelect))
+      .lean()
+      .exec();
+  } catch (error) {
+    throw new InternalServerError(error);
+  }
+};
+
 const getAllReviews = async ({
   page,
   limit,
@@ -128,6 +143,7 @@ const deleteReview = async (_id) => {
 
 module.exports = {
   getReviewDetails,
+  getReviewByMovieId,
   getAllReviews,
   createReview,
   updateReview,
