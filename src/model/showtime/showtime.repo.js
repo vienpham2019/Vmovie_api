@@ -5,6 +5,7 @@ const {
   getUnSelectData,
   convertToObjectIdMongoDB,
   getSkip,
+  getSelectData,
 } = require("../../util");
 const showtimeModel = require("./showtime.model");
 
@@ -71,6 +72,35 @@ const getAllShowtime = async ({ page, limit, sortBy, sortDir, search }) => {
       totalShowtimes,
       showtimes: results,
     };
+  } catch (error) {
+    throw new InternalServerError(error);
+  }
+};
+
+const findShowtime = async (
+  { movieId, date, time },
+  select = [
+    "childPrice",
+    "generalAdmissionPrice",
+    "seniorPrice",
+    "takenSeats",
+    "theaterId",
+  ]
+) => {
+  try {
+    return await showtimeModel
+      .findOne({
+        movieId: convertToObjectIdMongoDB(movieId),
+        date,
+        startTime: time,
+      })
+      .populate({
+        path: "theaterId",
+        select: "grid name",
+      })
+      .select(getSelectData(select))
+      .lean()
+      .exec();
   } catch (error) {
     throw new InternalServerError(error);
   }
@@ -285,6 +315,7 @@ const deleteShowtime = async ({ _id }) => {
 
 module.exports = {
   getAllShowtime,
+  findShowtime,
   getAllShowtimeDates,
   getAllShowtimeByMovieId,
   getShowtimeCountByMovieAndDate,

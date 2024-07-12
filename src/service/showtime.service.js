@@ -15,6 +15,7 @@ const {
   getAllShowtimeDates,
   getAllShowtimeByDate,
   getAllShowtimeByMovieId,
+  findShowtime,
 } = require("../model/showtime/showtime.repo");
 const { findTheaterByName } = require("../model/theater/theater.repo");
 const { isTimeBetween } = require("../util");
@@ -28,6 +29,19 @@ class ShowtimeService {
       throw new InternalServerError(error);
     }
   }
+
+  static async getShowtime({ date, time, movieId }) {
+    try {
+      const foundShowtime = await findShowtime({ date, time, movieId });
+      if (!foundShowtime) {
+        throw new BadRequestError("Showtime not found");
+      }
+      return foundShowtime;
+    } catch (error) {
+      throw new InternalServerError(error);
+    }
+  }
+
   static async getAllShowtimeByDate({ date }) {
     try {
       return await getAllShowtimeByDate({ date: date.split("-").join("/") });
@@ -156,6 +170,9 @@ class ShowtimeService {
       if (!foundMovie) {
         throw new BadRequestError("Movie not found");
       }
+      payload.generalAdmissionPrice = foundMovie.generalAdmissionPrice;
+      payload.childPrice = foundMovie.childPrice;
+      payload.seniorPrice = foundMovie.seniorPrice;
       const showtimes = await getAllShowTimeByQuery({
         query: { theaterId: foundTheater._id, date: payload.date },
         unSelect: ["updatedAt", "createdAt", "__v"],

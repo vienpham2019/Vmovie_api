@@ -126,8 +126,6 @@ class MovieService {
         "isCompleted",
         "isDraft",
         "isPublished",
-        "ratingScores",
-        "reviews",
       ];
       let movie = await getUncompletedMovie({ userId, unSelect });
 
@@ -153,8 +151,6 @@ class MovieService {
           "isCompleted",
           "isDraft",
           "isPublished",
-          "ratingScores",
-          "reviews",
         ],
       });
       for (const key in movie) {

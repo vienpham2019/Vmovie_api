@@ -10,6 +10,13 @@ class ShowtimeController {
     }).send(res);
   };
 
+  getShowtime = async (req, res, next) => {
+    new OK({
+      message: "Get showtime successfully!",
+      metadata: await ShowtimeService.getShowtime(req.query),
+    }).send(res);
+  };
+
   getAllShowtimeDates = async (req, res, next) => {
     new OK({
       message: "Get showtime dates successfully!",
