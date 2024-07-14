@@ -38,6 +38,14 @@ const getAllProducts = async ({
   };
 };
 
+const getAllProdyctByType = async ({ type, select = [] }) => {
+  try {
+    return await productModel.find({ type }).select(getSelectData(select));
+  } catch (error) {
+    throw new InternalServerError(error);
+  }
+};
+
 const getAllTypes = async () => {
   try {
     return await productModel.distinct("type");
@@ -131,6 +139,7 @@ const deleteOptionIdFromAllProducts = async ({ optionId }) => {
 
 module.exports = {
   getAllProducts,
+  getAllProdyctByType,
   getAllTypes,
   getProductDetails,
   createProduct,

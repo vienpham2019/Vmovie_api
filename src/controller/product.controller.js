@@ -12,6 +12,14 @@ class ProductController {
     }).send(res);
   };
 
+  getAllProductByType = async (req, res, next) => {
+    console.log(req.params);
+    new OK({
+      message: "Get all product by type successfully!",
+      metadata: await ProductService.getAllProductByType(req.params),
+    }).send(res);
+  };
+
   getAllTypes = async (req, res, next) => {
     new OK({
       message: "Get all type successfully!",

@@ -11,12 +11,13 @@ const {
   getProductDetails,
   updateProduct,
   deleteProductById,
+  getAllProductByType,
 } = require("../controller/product.controller");
 const { asyncHandler } = require("../helper/asyncHandler");
 
 router.get("/allTypes", asyncHandler(getAllTypes));
 router.get("/details/:_id", asyncHandler(getProductDetails));
-
+router.get("/getAllProductByType/:type", asyncHandler(getAllProductByType));
 router.use(authentication);
 router.use(checkUserRole([UserRoleEnum.ADMIN]));
 router.patch("/edit/:_id", asyncHandler(updateProduct));

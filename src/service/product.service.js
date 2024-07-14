@@ -11,6 +11,7 @@ const {
   getProductDetails,
   updateProduct,
   deleteProductById,
+  getAllProdyctByType,
 } = require("../model/product/product.repo");
 
 class ProductService {
@@ -28,6 +29,17 @@ class ProductService {
       return getProductDetails({
         _id,
         unSelect: ["updatedAt", "createdAt", "__v", "_id"],
+      });
+    } catch (error) {
+      throw new InternalServerError(error);
+    }
+  }
+
+  static async getAllProductByType({ type }) {
+    try {
+      return getAllProdyctByType({
+        type,
+        select: ["_id", "itemName", "price", "imgUrl"],
       });
     } catch (error) {
       throw new InternalServerError(error);
