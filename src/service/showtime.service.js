@@ -16,6 +16,7 @@ const {
   getAllShowtimeByDate,
   getAllShowtimeByMovieId,
   findShowtime,
+  updateTakenSeats,
 } = require("../model/showtime/showtime.repo");
 const { findTheaterByName } = require("../model/theater/theater.repo");
 const { isTimeBetween } = require("../util");
@@ -212,6 +213,36 @@ class ShowtimeService {
     }
   }
   // Update
+  static async checkout(payload) {
+    try {
+      const { tickets, selectedMovie } = payload;
+      const foundShowtime = await findShowtime({
+        movieId: selectedMovie._id,
+        date: tickets.date,
+        time: tickets.time,
+      });
+      if (!foundShowtime) {
+        throw new BadRequestError("showtime not found");
+      }
+      const takenSeats = tickets.seats.filter((seat) =>
+        foundShowtime.takenSeats.includes(seat)
+      );
+      if (takenSeats.length !== 0) {
+        throw new BadRequestError(
+          `Seat${takenSeats.length > 1 && "s"}: ${takenSeats.join(
+            ","
+          )} already taken. Please go back to confirm.`
+        );
+      }
+      await updateTakenSeats({
+        _id: foundShowtime._id,
+        seats: tickets.seats,
+      });
+      return { message: "checkout completed" };
+    } catch (error) {
+      throw new InternalServerError(error);
+    }
+  }
   // Delete
   static async deleteShowtime(_id) {
     try {

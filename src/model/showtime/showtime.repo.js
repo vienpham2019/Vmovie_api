@@ -10,6 +10,7 @@ const {
 const showtimeModel = require("./showtime.model");
 
 // Get
+
 const getAllShowtime = async ({ page, limit, sortBy, sortDir, search }) => {
   try {
     const totalShowtimes = await showtimeModel.countDocuments();
@@ -302,6 +303,16 @@ const createShowtime = async ({ payload }) => {
   }
 };
 // Update
+const updateTakenSeats = async ({ _id, seats }) => {
+  try {
+    return await showtimeModel.findOneAndUpdate(
+      { _id },
+      { $addToSet: { takenSeats: { $each: seats } } }
+    );
+  } catch (error) {
+    throw new InternalServerError(error);
+  }
+};
 // Delete
 const deleteShowtime = async ({ _id }) => {
   try {
@@ -316,6 +327,7 @@ const deleteShowtime = async ({ _id }) => {
 module.exports = {
   getAllShowtime,
   findShowtime,
+  updateTakenSeats,
   getAllShowtimeDates,
   getAllShowtimeByMovieId,
   getShowtimeCountByMovieAndDate,

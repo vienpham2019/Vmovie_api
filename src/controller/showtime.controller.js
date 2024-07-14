@@ -67,6 +67,13 @@ class ShowtimeController {
     }).send(res);
   };
 
+  checkout = async (req, res, next) => {
+    new OK({
+      message: "Checkout showtime successfully!",
+      metadata: await ShowtimeService.checkout(req.body),
+    }).send(res);
+  };
+
   deleteShowtime = async (req, res, next) => {
     new OK({
       message: "Delete showtime successfully!",
