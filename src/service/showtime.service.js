@@ -4,7 +4,10 @@ const {
   BadRequestError,
   InternalServerError,
 } = require("../core/error.response");
-const { getPublicMovieById } = require("../model/movie/movie.repo");
+const {
+  getPublicMovieById,
+  getMovieById,
+} = require("../model/movie/movie.repo");
 const {
   getAllShowTimeByQuery,
   createShowtime,
@@ -20,6 +23,8 @@ const {
 } = require("../model/showtime/showtime.repo");
 const { findTheaterByName } = require("../model/theater/theater.repo");
 const { isTimeBetween } = require("../util");
+const { generateUniqueCode } = require("../util/code");
+const { sendEmailTicket } = require("./email.service");
 
 class ShowtimeService {
   // Get
@@ -215,7 +220,7 @@ class ShowtimeService {
   // Update
   static async checkout(payload) {
     try {
-      const { tickets, selectedMovie } = payload;
+      const { tickets, selectedMovie, foodAndDrink, toEmail } = payload;
       const foundShowtime = await findShowtime({
         movieId: selectedMovie._id,
         date: tickets.date,
@@ -224,7 +229,11 @@ class ShowtimeService {
       if (!foundShowtime) {
         throw new BadRequestError("showtime not found");
       }
-      const takenSeats = tickets.seats.filter((seat) =>
+      const foundMovie = await getMovieById({ movieId: selectedMovie._id });
+      if (!foundMovie) {
+        throw new BadRequestError("movie not found");
+      }
+      const takenSeats = await tickets.seats.filter((seat) =>
         foundShowtime.takenSeats.includes(seat)
       );
       if (takenSeats.length !== 0) {
@@ -238,7 +247,32 @@ class ShowtimeService {
         _id: foundShowtime._id,
         seats: tickets.seats,
       });
-      return { message: "checkout completed" };
+      const { title, poster, runtime, rating, _id } = foundMovie;
+      payload.bookingId = generateUniqueCode(10);
+      payload.selectedMovie = { title, poster, runtime, rating, _id };
+      payload.tickets.theaterName = foundShowtime.theaterId.name;
+      payload.tickets.subTotal = Object.entries(tickets.prices).reduce(
+        (acc, [_, { price, count }]) => (acc += price * count),
+        0
+      );
+      payload.foodAndDrink.subTotal = foodAndDrink.products.reduce(
+        (acc, p) => (acc += p.price * p.amount),
+        0
+      );
+
+      payload.subTotal =
+        payload.tickets.subTotal + payload.foodAndDrink.subTotal;
+      payload.feed = 5.67;
+      payload.tax = payload.subTotal * 0.3;
+      payload.total = payload.feed + payload.tax + payload.subTotal;
+
+      await sendEmailTicket({
+        toEmail,
+        subject: "Order Confirmation",
+        ticketDetail: payload,
+      });
+
+      return payload;
     } catch (error) {
       throw new InternalServerError(error);
     }
