@@ -24,6 +24,7 @@ const {
 const { findTheaterByName } = require("../model/theater/theater.repo");
 const { isTimeBetween } = require("../util");
 const { generateUniqueCode } = require("../util/code");
+const EmailService = require("./email.service");
 const { sendEmailTicket } = require("./email.service");
 
 class ShowtimeService {
@@ -266,9 +267,8 @@ class ShowtimeService {
       payload.tax = payload.subTotal * 0.3;
       payload.total = payload.feed + payload.tax + payload.subTotal;
 
-      await sendEmailTicket({
+      await EmailService.sendEmailTicket({
         toEmail,
-        subject: "Order Confirmation",
         ticketDetail: payload,
       });
 

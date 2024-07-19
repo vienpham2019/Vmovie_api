@@ -1,4 +1,4 @@
-const emailForgotPassword = () => {
+const emailForgotPassword = (resetPasswordLink) => {
   return `
   <!DOCTYPE html>
   <html xmlns:v="urn:schemas-microsoft-com:vml" xmlns:o="urn:schemas-microsoft-com:office:office" lang="en">
@@ -181,7 +181,8 @@ const emailForgotPassword = () => {
                                 <td class="pad">
                                   <div style="color:#555555;direction:ltr;font-family:Arial, Helvetica Neue, Helvetica, sans-serif;font-size:16px;font-weight:400;letter-spacing:0px;line-height:120%;text-align:center;mso-line-height-alt:19.2px;">
                                     <p style="margin: 0; margin-bottom: 0px;">If you've lost your password or wish to reset it,&nbsp;</p>
-                                    <p style="margin: 0;">use the link below to get started.</p>
+                                    <p style="margin: 0;">click "Reset Password" button below to get started.</p>
+                                    <p style="margin: 0;">The password reset link expires in 15 minute.</p>
                                   </div>
                                 </td>
                               </tr>
@@ -194,7 +195,7 @@ const emailForgotPassword = () => {
   <w:anchorlock/>
   <v:textbox inset="0px,0px,0px,0px">
   <center dir="false" style="color:#ffffff;font-family:Arial, sans-serif;font-size:16px">
-  <![endif]--><a href="www.example.com" target="_blank" style="background-color:#336e91;border-bottom:0px solid transparent;border-left:0px solid transparent;border-radius:4px;border-right:0px solid transparent;border-top:0px solid transparent;color:#ffffff;display:inline-block;font-family:'Helvetica Neue', Helvetica, Arial, sans-serif;font-size:16px;font-weight:700;mso-border-alt:none;padding-bottom:10px;padding-top:10px;text-align:center;text-decoration:none;width:auto;word-break:keep-all;"><span style="word-break: break-word; padding-left: 50px; padding-right: 50px; font-size: 16px; display: inline-block; letter-spacing: normal;"><span style="word-break: break-word; line-height: 32px;">Reset Password</span></span></a><!--[if mso]></center></v:textbox></v:roundrect><![endif]--></div>
+  <![endif]--><a href=${resetPasswordLink} target="_blank" style="background-color:#336e91;border-bottom:0px solid transparent;border-left:0px solid transparent;border-radius:4px;border-right:0px solid transparent;border-top:0px solid transparent;color:#ffffff;display:inline-block;font-family:'Helvetica Neue', Helvetica, Arial, sans-serif;font-size:16px;font-weight:700;mso-border-alt:none;padding-bottom:10px;padding-top:10px;text-align:center;text-decoration:none;width:auto;word-break:keep-all;"><span style="word-break: break-word; padding-left: 50px; padding-right: 50px; font-size: 16px; display: inline-block; letter-spacing: normal;"><span style="word-break: break-word; line-height: 32px;">Reset Password</span></span></a><!--[if mso]></center></v:textbox></v:roundrect><![endif]--></div>
                                 </td>
                               </tr>
                             </table>

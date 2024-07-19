@@ -10,6 +10,7 @@ const {
   createOrUpdateKeyToken,
 } = require("../model/keyToken/keyToken.repo");
 const RedisService = require("./redis.service");
+const EmailService = require("./email.service");
 
 class AuthService {
   static async logIn({ email, password }) {
@@ -73,10 +74,10 @@ class AuthService {
     return { message: "Your password has been changed successfully." };
   }
 
-  static async forgotPassword({ email, clientUrl }) {
+  static async forgotPassword({ email }) {
     const foundUser = await getUserByEmail({ email });
     if (!foundUser) {
-      throw new UnauthorizedError("Email was not found!");
+      return { message: "Send Successful" };
     }
 
     const { _id } = foundUser;
@@ -87,6 +88,12 @@ class AuthService {
       _id.toString(),
       minsToSeconds(15)
     );
+
+    const resetPasswordLink = `${process.env.CLIENT_URL}/resetpassword/${token}`;
+    await EmailService.sendEmailResetPassword({
+      link: resetPasswordLink,
+      toEmail: email,
+    });
     // send to user
     return { message: "Send Successful" };
   }
