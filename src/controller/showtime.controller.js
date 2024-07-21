@@ -10,6 +10,13 @@ class ShowtimeController {
     }).send(res);
   };
 
+  getAllMoviesInShowtime = async (req, res, next) => {
+    new OK({
+      message: "Get all movies in showtime successfully!",
+      metadata: await ShowtimeService.getAllMoviesInShowtime(),
+    }).send(res);
+  };
+
   getShowtime = async (req, res, next) => {
     new OK({
       message: "Get showtime successfully!",

@@ -10,12 +10,63 @@ const {
 const showtimeModel = require("./showtime.model");
 
 // Get
-
-const getAllShowtime = async ({ page, limit, sortBy, sortDir, search }) => {
+const getAllMoviesInShowtime = async () => {
   try {
-    const totalShowtimes = await showtimeModel.countDocuments();
+    const results = await showtimeModel.aggregate([
+      {
+        $lookup: {
+          from: "Movies", // Name of the movie collection
+          localField: "movieId",
+          foreignField: "_id",
+          as: "movieDetails",
+        },
+      },
+      {
+        $unwind: "$movieDetails",
+      },
+      {
+        $match: {
+          "movieDetails.isPublished": true,
+        },
+      },
+      {
+        $group: {
+          _id: "$movieId",
+          title: { $first: "$movieDetails.title" },
+          runtime: { $first: "$movieDetails.runtime" },
+          posterUrl: { $first: "$movieDetails.poster.url" },
+          trailer: { $first: "$movieDetails.trailer" },
+          genre: { $first: "$movieDetails.genre" },
+          dateRelease: { $first: "$movieDetails.dateRelease" },
+          rating: { $first: "$movieDetails.rating" },
+        },
+      },
+      {
+        $project: {
+          _id: 1,
+          title: 1,
+          runtime: 1,
+          posterUrl: 1,
+          trailer: 1,
+          genre: 1,
+          dateRelease: 1,
+          rating: 1,
+        },
+      },
+    ]);
+    return results.sort((a, b) => a.title.localeCompare(b.title));
+  } catch (error) {
+    throw new InternalServerError(error);
+  }
+};
+const getAllShowtime = async ({ page, limit, sortBy, sortDir, query }) => {
+  try {
+    const totalShowtimes = await showtimeModel.countDocuments(query);
 
     const results = await showtimeModel.aggregate([
+      {
+        $match: query,
+      },
       {
         $lookup: {
           from: "Movies", // Name of the movie collection
@@ -38,9 +89,7 @@ const getAllShowtime = async ({ page, limit, sortBy, sortDir, search }) => {
       {
         $unwind: "$theaterDetails",
       },
-      {
-        $match: search,
-      },
+
       {
         $sort: { [sortBy]: +sortDir },
       },
@@ -326,6 +375,7 @@ const deleteShowtime = async ({ _id }) => {
 
 module.exports = {
   getAllShowtime,
+  getAllMoviesInShowtime,
   findShowtime,
   updateTakenSeats,
   getAllShowtimeDates,

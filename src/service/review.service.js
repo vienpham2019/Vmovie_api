@@ -4,7 +4,10 @@ const {
   InternalServerError,
   BadRequestError,
 } = require("../core/error.response");
-const { getMovieById } = require("../model/movie/movie.repo");
+const {
+  getMovieById,
+  getAllMoviesByQuery,
+} = require("../model/movie/movie.repo");
 const {
   createReview,
   getAllReviews,
@@ -38,8 +41,13 @@ class ReviewService {
     try {
       const regex = new RegExp(search, "i"); // "i" flag for case-insensitive matching
 
-      const searchQuery = {
-        "movieDetails.title": { $regex: regex },
+      const movieIds = await getAllMoviesByQuery({
+        query: { title: { $regex: regex } },
+        select: ["_id"],
+      });
+
+      const query = {
+        movieId: { $in: movieIds.map(({ _id }) => _id) },
       };
 
       if (sortBy === "movieDetails") {
@@ -53,7 +61,7 @@ class ReviewService {
         limit,
         sortBy,
         sortDir,
-        search: searchQuery,
+        query,
       });
     } catch (error) {
       throw new InternalServerError(error);

@@ -3,6 +3,11 @@ const { createClient } = require("redis");
 // Create a Redis client
 const redisClient = createClient({
   legacyMode: true,
+  password: process.env.REDIS_PASS,
+  socket: {
+    host: process.env.REDIS_ENDPOINT,
+    port: process.env.REDIS_PORT,
+  },
 });
 redisClient.connect();
 

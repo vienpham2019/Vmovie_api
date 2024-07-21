@@ -7,6 +7,7 @@ const {
 const {
   getPublicMovieById,
   getMovieById,
+  getAllMoviesByQuery,
 } = require("../model/movie/movie.repo");
 const {
   getAllShowTimeByQuery,
@@ -20,18 +21,26 @@ const {
   getAllShowtimeByMovieId,
   findShowtime,
   updateTakenSeats,
+  getAllMoviesInShowtime,
 } = require("../model/showtime/showtime.repo");
 const { findTheaterByName } = require("../model/theater/theater.repo");
 const { isTimeBetween } = require("../util");
 const { generateUniqueCode } = require("../util/code");
 const EmailService = require("./email.service");
-const { sendEmailTicket } = require("./email.service");
 
 class ShowtimeService {
   // Get
   static async getAllShowtimeDates() {
     try {
       return await getAllShowtimeDates();
+    } catch (error) {
+      throw new InternalServerError(error);
+    }
+  }
+
+  static async getAllMoviesInShowtime() {
+    try {
+      return await getAllMoviesInShowtime();
     } catch (error) {
       throw new InternalServerError(error);
     }
@@ -74,8 +83,13 @@ class ShowtimeService {
   }) {
     const regex = new RegExp(search, "i"); // "i" flag for case-insensitive matching
 
-    const searchQuery = {
-      "movieDetails.title": { $regex: regex },
+    const movieIds = await getAllMoviesByQuery({
+      query: { title: { $regex: regex } },
+      select: ["_id"],
+    });
+
+    const query = {
+      movieId: { $in: movieIds.map(({ _id }) => _id) },
     };
 
     if (sortBy === "movieDetails") {
@@ -90,7 +104,7 @@ class ShowtimeService {
         limit,
         sortBy,
         sortDir,
-        search: searchQuery,
+        query,
       });
     } catch (error) {
       throw new InternalServerError(error);
@@ -106,9 +120,13 @@ class ShowtimeService {
   }) {
     const regex = new RegExp(search, "i"); // "i" flag for case-insensitive matching
 
-    const searchQuery = {
-      "movieDetails.title": { $regex: regex },
-      "movieDetails.isPublished": true,
+    const movieIds = await getAllMoviesByQuery({
+      query: { title: { $regex: regex }, isPublished: true },
+      select: ["_id"],
+    });
+
+    const query = {
+      movieId: { $in: movieIds.map(({ _id }) => _id) },
     };
 
     if (sortBy === "movieDetails") {
@@ -123,7 +141,7 @@ class ShowtimeService {
         limit,
         sortBy,
         sortDir,
-        search: searchQuery,
+        query,
       });
     } catch (error) {
       throw new InternalServerError(error);

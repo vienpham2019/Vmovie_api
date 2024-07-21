@@ -40,16 +40,9 @@ const getReviewByMovieId = async ({
   }
 };
 
-const getAllReviews = async ({
-  page,
-  limit,
-  sortBy,
-  sortDir,
-  query = {},
-  search,
-}) => {
+const getAllReviews = async ({ page, limit, sortBy, sortDir, query = {} }) => {
   try {
-    const totalReviews = await reviewModel.countDocuments();
+    const totalReviews = await reviewModel.countDocuments(query);
 
     const results = await reviewModel.aggregate([
       {
@@ -66,9 +59,7 @@ const getAllReviews = async ({
       {
         $unwind: "$movieDetails",
       },
-      {
-        $match: search,
-      },
+
       {
         $sort: { [sortBy]: +sortDir },
       },
@@ -76,6 +67,7 @@ const getAllReviews = async ({
         $project: {
           _id: 1,
           type: 1,
+          date: 1,
           reviewContent: 1,
           createdAt: 1,
           updatedAt: 1,

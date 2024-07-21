@@ -2,7 +2,6 @@
 
 const { Schema, model } = require("mongoose"); // Erase if already required
 const { RatingEnum, GenreEnum } = require("./movie.enum");
-const { TypeEnum } = require("../review/review.enum");
 
 const DOCUMENT_NAME = "Movie";
 const COLLECTION_NAME = "Movies";
@@ -22,13 +21,6 @@ const pictureSchema = new Schema(
 const movieSchema = new Schema(
   {
     title: String,
-    ratingScores: {
-      type: Number,
-      default: 0,
-      min: 0,
-      max: 5,
-      step: 0.1,
-    },
     IMDBScore: String,
     RottenTomatoesScore: String,
     TMDBScore: String,

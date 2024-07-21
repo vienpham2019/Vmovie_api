@@ -40,6 +40,16 @@ const getAllMovies = async ({
   };
 };
 
+const getAllMoviesByQuery = async ({ query, select = [] }) => {
+  const movies = await movieModel
+    .find({ isCompleted: true, ...query })
+    .select(getSelectData(select))
+    .lean()
+    .exec();
+
+  return movies;
+};
+
 const getMovieById = async ({ movieId, unSelect = [] }) => {
   return await movieModel
     .findOne({ _id: convertToObjectIdMongoDB(movieId) })
@@ -124,6 +134,7 @@ const deleteMovieById = async ({ movieId }) => {
 
 module.exports = {
   getTotalMovies,
+  getAllMoviesByQuery,
   getAllMovies,
   getUncompletedMovie,
   getMovieById,
