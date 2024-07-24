@@ -1,6 +1,9 @@
 "use strict";
 
-const { InternalServerError } = require("../../core/error.response");
+const {
+  InternalServerError,
+  BadRequestError,
+} = require("../../core/error.response");
 const {
   getUnSelectData,
   convertToObjectIdMongoDB,
@@ -373,6 +376,32 @@ const deleteShowtime = async ({ _id }) => {
   }
 };
 
+const deleteShowtimesBetweenDates = async (startDate, endDate) => {
+  if (!startDate || !endDate) {
+    throw new BadRequestError("Please provide both start date and end date");
+  }
+
+  try {
+    const result = await showtimeModel.deleteMany({
+      date: {
+        $gte: startDate,
+        $lte: endDate,
+      },
+    });
+    return result;
+  } catch (error) {
+    throw new Error("Error deleting showtimes: " + error.message);
+  }
+};
+
+const deleteAllShowtimes = async () => {
+  try {
+    return await showtimeModel.deleteMany({});
+  } catch (error) {
+    console.error("Error deleting showtimes:", error);
+  }
+};
+
 module.exports = {
   getAllShowtime,
   getAllMoviesInShowtime,
@@ -386,4 +415,6 @@ module.exports = {
   createShowtime,
   getShowTimeById,
   deleteShowtime,
+  deleteShowtimesBetweenDates,
+  deleteAllShowtimes,
 };

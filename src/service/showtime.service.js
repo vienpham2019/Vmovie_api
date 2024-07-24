@@ -8,6 +8,7 @@ const {
   getPublicMovieById,
   getMovieById,
   getAllMoviesByQuery,
+  getAllMovieByIds,
 } = require("../model/movie/movie.repo");
 const {
   getAllShowTimeByQuery,
@@ -22,10 +23,26 @@ const {
   findShowtime,
   updateTakenSeats,
   getAllMoviesInShowtime,
+  deleteAllShowtimes,
 } = require("../model/showtime/showtime.repo");
-const { findTheaterByName } = require("../model/theater/theater.repo");
-const { isTimeBetween } = require("../util");
+const {
+  findTheaterByName,
+  checkAllTheaterIdsExist,
+  getAllTheaterByIds,
+} = require("../model/theater/theater.repo");
+const { isTimeBetween, getRandomNumberBetween } = require("../util");
+const { shuffleArray } = require("../util/array");
 const { generateUniqueCode } = require("../util/code");
+const {
+  countDaysBetween,
+  formatDate,
+  DateFormatTypeEnum,
+} = require("../util/day");
+const {
+  timeToMinutes,
+  subtractTimesStr,
+  convertMillisecondsTo24Hour,
+} = require("../util/time");
 const EmailService = require("./email.service");
 
 class ShowtimeService {
@@ -232,6 +249,164 @@ class ShowtimeService {
       });
       const resShowtime = await getShowTimeById(newShowtime._id);
       return this.modifyData(resShowtime);
+    } catch (error) {
+      throw new InternalServerError(error);
+    }
+  }
+
+  static async createMultipleShowtime({
+    selectDay,
+    showTime,
+    selectedMovies,
+    selectedTheaters,
+    breakTime,
+  }) {
+    try {
+      if (countDaysBetween(selectDay[0], selectDay[1]) > 7) {
+        throw new BadRequestError(
+          "Can't generate more than 7 days of showtimes"
+        );
+      }
+
+      if (timeToMinutes(showTime.startTime) > timeToMinutes(showTime.endTime)) {
+        throw new BadRequestError("Start time can't be after end time");
+      }
+      const { hours: hourDiff } = subtractTimesStr(
+        showTime.endTime,
+        showTime.startTime
+      );
+      if (hourDiff < 5) {
+        throw new BadRequestError(
+          "Time between start time and end time needs to be greater than 5 hours"
+        );
+      }
+      if (!Array.isArray(selectedMovies) || selectedMovies.length === 0) {
+        throw new BadRequestError("Please select movie");
+      }
+      const movies = await getAllMovieByIds({
+        ids: selectedMovies,
+        selected: [
+          "_id",
+          "runtime",
+          "generalAdmissionPrice",
+          "childPrice",
+          "seniorPrice",
+        ],
+      });
+      if (movies.length !== selectedMovies.length) {
+        throw new BadRequestError("Some movie is not exist");
+      }
+
+      if (!Array.isArray(selectedTheaters) || selectedTheaters.length === 0) {
+        throw new BadRequestError("Please select theater");
+      }
+
+      const theaters = await getAllTheaterByIds({
+        ids: selectedTheaters,
+        selected: ["_id", "name"],
+      });
+      if (theaters.length !== selectedTheaters.length) {
+        throw new BadRequestError("Some theater is not exist");
+      }
+
+      // Helper function to add days to a date
+      const addDays = (date, days) => {
+        const result = new Date(date);
+        result.setDate(result.getDate() + days);
+        return result;
+      };
+
+      // Helper function to create Date objects for specific times on a given date
+      const createTimeOnDate = (date, time) => {
+        const [hours, minutes] = time.split(":").map(Number);
+        const result = new Date(date);
+        result.setHours(hours, minutes, 0, 0); // Set hours and minutes, reset seconds and milliseconds
+        return result;
+      };
+
+      // Initialize the start and end dates
+      const [startDate, endDate] = selectDay;
+      await deleteAllShowtimes();
+      const start = new Date(startDate);
+      const end = new Date(endDate);
+      const { startTime, endTime } = showTime;
+      let timeDiff = timeToMinutes(endTime) - timeToMinutes(startTime);
+      let shuffledMovies = shuffleArray([...movies]);
+      let createShowtimePromises = [];
+      // Loop through each date in the specified range
+      for (let date = start; date <= end; date = addDays(date, 1)) {
+        // Loop through each theater
+        for (const theater of theaters) {
+          let currentTime = createTimeOnDate(date, startTime);
+          const endTimeOnDate = createTimeOnDate(date, endTime);
+          let remainTime = timeDiff;
+          // Loop through each shuffled movie to schedule showtimes
+          while (shuffledMovies.length > 0) {
+            const movie = shuffledMovies[0];
+            const movieRuntime = Math.ceil(parseInt(movie.runtime)); // Round up runtime to the nearest minute
+            const movieEndTime = new Date(
+              currentTime.getTime() + movieRuntime * 60000
+            ); // Multiply by 60000 to convert minutes to milliseconds
+            const resStartTime = convertMillisecondsTo24Hour(
+              currentTime.getTime()
+            );
+            const resEndTime = convertMillisecondsTo24Hour(
+              movieEndTime.getTime()
+            );
+            if (
+              movieEndTime > endTimeOnDate ||
+              +resStartTime.split(":")[0] < +startTime.split(":")[0] ||
+              +resStartTime.split(":")[0] > +resEndTime.split(":")[0]
+            ) {
+              break;
+            }
+
+            shuffledMovies.shift();
+            if (shuffledMovies.length === 0) {
+              shuffledMovies = shuffleArray([...movies]);
+            }
+
+            // Add the showtime to the list
+            createShowtimePromises.push(
+              createShowtime({
+                payload: {
+                  theaterId: theater._id,
+                  movieId: movie._id,
+                  date: formatDate({
+                    date: currentTime,
+                    formatType: DateFormatTypeEnum.MM_DD_YYYY,
+                  }), // Create a new Date object to avoid reference issues
+                  startTime: resStartTime,
+                  endTime: resEndTime,
+                  generalAdmissionPrice: movie.generalAdmissionPrice,
+                  childPrice: movie.childPrice,
+                  seniorPrice: movie.seniorPrice,
+                },
+              })
+            );
+
+            // Update the current time to the end time of the current movie
+            currentTime = new Date(movieEndTime);
+
+            // Add a break time (optional)
+            currentTime.setMinutes(currentTime.getMinutes() + breakTime);
+          }
+        }
+      }
+
+      const results = await Promise.allSettled(createShowtimePromises);
+      const successfulCreations = results.filter(
+        (result) => result.status === "fulfilled"
+      ).length;
+      const failedCreations = results.filter(
+        (result) => result.status === "rejected"
+      ).length;
+
+      return {
+        success: failedCreations === 0,
+        successfulCreations,
+        failedCreations,
+      };
     } catch (error) {
       throw new InternalServerError(error);
     }

@@ -56,6 +56,14 @@ const findTheaterById = async (_id) => {
     throw new InternalServerError(error);
   }
 };
+
+const getAllTheaterByIds = async ({ ids, selected }) => {
+  return await theaterModel
+    .find({ _id: { $in: ids } })
+    .select(getSelectData(selected))
+    .lean()
+    .exec();
+};
 // Create
 const createTheater = async ({ payload }) => {
   try {
@@ -88,6 +96,7 @@ const deleteTheaterById = async ({ _id }) => {
 module.exports = {
   getTheaterDetails,
   getAllTheaters,
+  getAllTheaterByIds,
   createTheater,
   updateTheater,
   findTheaterByName,

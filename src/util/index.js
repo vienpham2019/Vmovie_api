@@ -87,6 +87,11 @@ const isTimeBetween = ({ startTime, endTime, checkTime }) => {
   );
 };
 
+const getRandomNumberBetween = ({ min, max }) => {
+  const randomNumber = Math.floor(Math.random() * (max - min + 1)) + min;
+  return randomNumber;
+};
+
 module.exports = {
   convertToObjectIdMongoDB,
   getSelectData,
@@ -105,4 +110,5 @@ module.exports = {
   removeDuplicatesInArray,
   formatFileSize,
   isTimeBetween,
+  getRandomNumberBetween,
 };

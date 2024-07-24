@@ -77,6 +77,14 @@ const getUncompletedMovie = async ({ userId, unSelect = [] }) => {
     .lean()
     .exec();
 };
+
+const getAllMovieByIds = async ({ ids, selected }) => {
+  return await movieModel
+    .find({ _id: { $in: ids } })
+    .select(getSelectData(selected))
+    .lean()
+    .exec();
+};
 // Create
 const createMovieByUserId = async ({ userId, unSelect = [] }) => {
   const payload = {
@@ -139,6 +147,7 @@ module.exports = {
   getUncompletedMovie,
   getMovieById,
   getPublicMovieById,
+  getAllMovieByIds,
   createMovieByUserId,
   updateMovieByMovieId,
   addMoviePhotos,

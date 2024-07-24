@@ -69,8 +69,15 @@ class ShowtimeController {
 
   createShowtime = async (req, res, next) => {
     new OK({
-      message: "Create all showtime successfully!",
+      message: "Create showtime successfully!",
       metadata: await ShowtimeService.createShowtime(req.body),
+    }).send(res);
+  };
+
+  createMultipleShowtime = async (req, res, next) => {
+    new OK({
+      message: "Create multiple showtime successfully!",
+      metadata: await ShowtimeService.createMultipleShowtime(req.body),
     }).send(res);
   };
 

@@ -19,6 +19,7 @@ const {
   getShowtime,
   checkout,
   getAllMoviesInShowtime,
+  createMultipleShowtime,
 } = require("../controller/showtime.controller");
 
 router.get("/allDates", asyncHandler(getAllShowtimeDates));
@@ -37,6 +38,7 @@ router.get(
   asyncHandler(getShowtimeCountByMovieAndDate)
 );
 router.post("/new", asyncHandler(createShowtime));
+router.post("/new/multiple", asyncHandler(createMultipleShowtime));
 router.delete("/:_id", asyncHandler(deleteShowtime));
 
 module.exports = router;
