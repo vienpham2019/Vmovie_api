@@ -29,7 +29,7 @@ const checkUserRole = (roles) => {
 
 const authentication = asyncHandler(async (req, res, next) => {
   const { cookies } = req;
-  console.log(cookies);
+  console.log(req);
   if (!cookies?.jwt) {
     throw new UnauthorizedError("No cookie");
   }
