@@ -8,7 +8,7 @@ const { daysToMilliseconds } = require("../util");
 const setJwtCookie = (res, refreshToken) => {
   res.cookie("jwt", refreshToken, {
     httpOnly: true, // accessible only by web server
-    secure: false, // https
+    secure: process.env.NODE_ENV === "production", // https
     sameSite: "Strict", // cross-site cookie
     maxAge: daysToMilliseconds(7), // 7 days
   });
@@ -17,19 +17,23 @@ const setJwtCookie = (res, refreshToken) => {
 const setUserIdCookie = (res, memberId) => {
   res.cookie("UserId", memberId, {
     httpOnly: true, // accessible only by web server
-    secure: false, // https
+    secure: process.env.NODE_ENV === "production", // https
     sameSite: "Strict", // cross-site cookie
   });
 };
 
 const clearJwtCookie = (res) => {
-  res.clearCookie("jwt", { httpOnly: true, secure: false, sameSite: "Strict" });
+  res.clearCookie("jwt", {
+    httpOnly: true,
+    secure: process.env.NODE_ENV === "production",
+    sameSite: "Strict",
+  });
 };
 
 const clearUserIdCookie = (res) => {
   res.clearCookie("UserId", {
     httpOnly: true,
-    secure: false,
+    secure: process.env.NODE_ENV === "production",
     sameSite: "Strict",
   });
 };
