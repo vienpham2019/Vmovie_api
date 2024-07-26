@@ -3,7 +3,7 @@ const bcrypt = require("bcrypt");
 const { UnauthorizedError, NotFoundError } = require("../core/error.response");
 const { getUserByEmail, getUserById } = require("../model/user/user.repo");
 const { createTokenCode, minsToSeconds } = require("../util");
-const UserService = require("./User.service");
+
 const { createTokenPair } = require("../middleware/authUtil");
 const {
   deleteKeyTokenById,
@@ -11,6 +11,7 @@ const {
 } = require("../model/keyToken/keyToken.repo");
 const RedisService = require("./redis.service");
 const EmailService = require("./email.service");
+// const UserService = require("./User.service");
 
 class AuthService {
   static async logIn({ email, password }) {
@@ -50,12 +51,12 @@ class AuthService {
   }
 
   static async signUp(payload) {
-    const newUser = await UserService.createUser(payload);
-    if (!newUser) {
-      throw new InternalServerError(
-        `Unable to complete signup process. Please try again`
-      );
-    }
+    // const newUser = await UserService.createUser(payload);
+    // if (!newUser) {
+    //   throw new InternalServerError(
+    //     `Unable to complete signup process. Please try again`
+    //   );
+    // }
     return { message: "Signup successful" };
   }
 
@@ -68,7 +69,7 @@ class AuthService {
     }
 
     const foundUser = await getUserById({ _id: foundToken });
-    await UserService.updateUserById({ _id: foundUser._id, password });
+    // await UserService.updateUserById({ _id: foundUser._id, password });
     await RedisService.delete(`forgot_pass:${token}`);
 
     return { message: "Your password has been changed successfully." };
