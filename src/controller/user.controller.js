@@ -1,5 +1,5 @@
 const { OK } = require("../core/success.response");
-const UserService = require("../service/User.service");
+const UserService = require("../service/user.service");
 
 class UserController {
   // Get
