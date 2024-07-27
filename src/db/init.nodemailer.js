@@ -28,7 +28,7 @@ const getTransport = async () => {
         clientId: NODEMAILER_CLIENT_ID,
         clientSecret: NODEMAILER_CLIENT_SECRET,
         refreshToken: NODEMAILER_REFRESH_TOKEN,
-        accessToken: accessToken.token,
+        accessToken,
       },
     });
     return transport;
