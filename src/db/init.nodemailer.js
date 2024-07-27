@@ -28,12 +28,13 @@ const getTransport = async () => {
         clientId: NODEMAILER_CLIENT_ID,
         clientSecret: NODEMAILER_CLIENT_SECRET,
         refreshToken: NODEMAILER_REFRESH_TOKEN,
-        accessToken,
+        accessToken: accessToken.token,
       },
     });
     return transport;
   } catch (error) {
-    console.error(error);
+    console.error("Error creating transport:", error);
+    throw new Error("Failed to create transport");
   }
 };
 
