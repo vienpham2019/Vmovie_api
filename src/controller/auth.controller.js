@@ -10,8 +10,8 @@ const setJwtCookie = (res, refreshToken) => {
 
   res.cookie("jwt", refreshToken, {
     httpOnly: true, // accessible only by web server
-    secure: true, // https
-    sameSite: "Strict", // cross-site cookie
+    secure: process.env.NODE_ENV === "production", // https
+    sameSite: "None", // cross-site cookie
     maxAge: daysToMilliseconds(7), // 7 days
   });
 };
@@ -19,24 +19,24 @@ const setJwtCookie = (res, refreshToken) => {
 const setUserIdCookie = (res, memberId) => {
   res.cookie("UserId", memberId, {
     httpOnly: true, // accessible only by web server
-    secure: true, // https
-    sameSite: "Strict", // cross-site cookie
+    secure: process.env.NODE_ENV === "production", // https
+    sameSite: "None", // cross-site cookie
   });
 };
 
 const clearJwtCookie = (res) => {
   res.clearCookie("jwt", {
     httpOnly: true,
-    secure: true,
-    sameSite: "Strict",
+    secure: process.env.NODE_ENV === "production",
+    sameSite: "None",
   });
 };
 
 const clearUserIdCookie = (res) => {
   res.clearCookie("UserId", {
     httpOnly: true,
-    secure: true,
-    sameSite: "Strict",
+    secure: process.env.NODE_ENV === "production",
+    sameSite: "None",
   });
 };
 
