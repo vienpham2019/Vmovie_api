@@ -460,10 +460,10 @@ class ShowtimeService {
       payload.tax = payload.subTotal * 0.3;
       payload.total = payload.feed + payload.tax + payload.subTotal;
 
-      await EmailService.sendEmailTicket({
-        toEmail,
-        ticketDetail: payload,
-      });
+      // await EmailService.sendEmailTicket({
+      //   toEmail,
+      //   ticketDetail: payload,
+      // });
 
       return payload;
     } catch (error) {

@@ -6,12 +6,10 @@ const AuthService = require("../service/auth.service");
 const { daysToMilliseconds } = require("../util");
 
 const setJwtCookie = (res, refreshToken) => {
-  console.log(process.env.NODE_ENV === "production");
-
   res.cookie("jwt", refreshToken, {
     httpOnly: true, // accessible only by web server
     secure: process.env.NODE_ENV === "production", // https
-    sameSite: "None", // cross-site cookie
+    sameSite: process.env.NODE_ENV === "production" ? "None" : "Strict", // cross-site cookie
     maxAge: daysToMilliseconds(7), // 7 days
   });
 };
@@ -20,7 +18,7 @@ const setUserIdCookie = (res, memberId) => {
   res.cookie("UserId", memberId, {
     httpOnly: true, // accessible only by web server
     secure: process.env.NODE_ENV === "production", // https
-    sameSite: "None", // cross-site cookie
+    sameSite: process.env.NODE_ENV === "production" ? "None" : "Strict", // cross-site cookie
   });
 };
 
@@ -28,7 +26,7 @@ const clearJwtCookie = (res) => {
   res.clearCookie("jwt", {
     httpOnly: true,
     secure: process.env.NODE_ENV === "production",
-    sameSite: "None",
+    sameSite: process.env.NODE_ENV === "production" ? "None" : "Strict",
   });
 };
 
@@ -36,7 +34,7 @@ const clearUserIdCookie = (res) => {
   res.clearCookie("UserId", {
     httpOnly: true,
     secure: process.env.NODE_ENV === "production",
-    sameSite: "None",
+    sameSite: process.env.NODE_ENV === "production" ? "None" : "Strict",
   });
 };
 
