@@ -14,6 +14,8 @@ const setJwtCookie = (res, refreshToken) => {
   });
 };
 
+console.log(process.env.NODE_ENV === "production");
+
 const setUserIdCookie = (res, memberId) => {
   res.cookie("UserId", memberId, {
     httpOnly: true, // accessible only by web server
