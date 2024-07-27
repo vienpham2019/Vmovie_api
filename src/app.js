@@ -37,6 +37,9 @@ app.use(
 //Parses cookies attached to incoming requests, making them available in req.cookies for easy access in your route handlers.
 app.use(cookieParser());
 
+// Trust the first proxy in front of the app (e.g., Heroku, Render)
+app.set("trust proxy", 1); // Adjust the number to match your proxy chain (1 if you have a single proxy, 2 if two proxies, etc.)
+
 // init db
 require("./db/init.mongodb");
 
