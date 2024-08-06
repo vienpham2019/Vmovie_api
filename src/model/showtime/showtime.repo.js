@@ -131,7 +131,7 @@ const getAllShowtime = async ({ page, limit, sortBy, sortDir, query }) => {
 };
 
 const findShowtime = async (
-  { movieId, date, time },
+  { movieId, date, time, theaterId },
   select = [
     "childPrice",
     "generalAdmissionPrice",
@@ -146,6 +146,7 @@ const findShowtime = async (
         movieId: convertToObjectIdMongoDB(movieId),
         date,
         startTime: time,
+        theaterId: convertToObjectIdMongoDB(theaterId),
       })
       .populate({
         path: "theaterId",
@@ -161,9 +162,55 @@ const findShowtime = async (
 
 const getAllShowtimeByDate = async ({ date }) => {
   try {
+    // const results = await showtimeModel.aggregate([
+    //   {
+    //     $match: { date },
+    //   },
+    //   {
+    //     $lookup: {
+    //       from: "Movies", // Name of the movie collection
+    //       localField: "movieId",
+    //       foreignField: "_id",
+    //       as: "movieDetails",
+    //     },
+    //   },
+    //   {
+    //     $unwind: "$movieDetails",
+    //   },
+    //   {
+    //     $group: {
+    //       _id: {
+    //         movieId: "$movieId",
+    //         title: "$movieDetails.title",
+    //         runtime: "$movieDetails.runtime",
+    //         rating: "$movieDetails.rating",
+    //         posterUrl: "$movieDetails.poster.url",
+    //         trailer: "$movieDetails.trailer",
+    //       },
+    //       showtimes: {
+    //         $push: {
+    //           startTime: "$startTime",
+    //         },
+    //       },
+    //     },
+    //   },
+    //   {
+    //     $project: {
+    //       _id: 0,
+    //       movieId: "$_id.movieId",
+    //       title: "$_id.title",
+    //       runtime: "$_id.runtime",
+    //       rating: "$_id.rating",
+    //       posterUrl: "$_id.posterUrl",
+    //       trailer: "$_id.trailer",
+    //       showtimes: 1,
+    //     },
+    //   },
+    // ]);
+
     const results = await showtimeModel.aggregate([
       {
-        $match: { date },
+        $match: { date }, // Match the specified date
       },
       {
         $lookup: {
@@ -175,6 +222,17 @@ const getAllShowtimeByDate = async ({ date }) => {
       },
       {
         $unwind: "$movieDetails",
+      },
+      {
+        $lookup: {
+          from: "Theaters", // Name of the theaters collection
+          localField: "theaterId",
+          foreignField: "_id",
+          as: "theaterDetails",
+        },
+      },
+      {
+        $unwind: "$theaterDetails",
       },
       {
         $group: {
@@ -189,6 +247,18 @@ const getAllShowtimeByDate = async ({ date }) => {
           showtimes: {
             $push: {
               startTime: "$startTime",
+              theaterId: "$theaterId",
+              theaterName: "$theaterDetails.name",
+            },
+          },
+        },
+      },
+      {
+        $addFields: {
+          showtimes: {
+            $sortArray: {
+              input: "$showtimes",
+              sortBy: { startTime: 1 }, // Sort by startTime in ascending order
             },
           },
         },
@@ -220,9 +290,36 @@ const getAllShowtimeByMovieId = async ({ movieId }) => {
         $match: { movieId: convertToObjectIdMongoDB(movieId) }, // Match the specified movieId
       },
       {
+        $lookup: {
+          from: "Theaters", // Name of the theaters collection
+          localField: "theaterId", // Field in showtimeModel that references the theater
+          foreignField: "_id", // Field in theaterModel that is referenced
+          as: "theater", // Output array field
+        },
+      },
+      {
+        $unwind: "$theater", // Deconstruct the array to include theater document fields
+      },
+      {
         $group: {
           _id: "$date",
-          showtimes: { $push: "$startTime" },
+          showtimes: {
+            $push: {
+              startTime: "$startTime",
+              theaterId: "$theaterId",
+              theaterName: "$theater.name",
+            },
+          },
+        },
+      },
+      {
+        $addFields: {
+          showtimes: {
+            $sortArray: {
+              input: "$showtimes",
+              sortBy: { startTime: 1 }, // Sort by startTime in ascending order
+            },
+          },
         },
       },
       {

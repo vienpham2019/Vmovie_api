@@ -63,9 +63,14 @@ class ShowtimeService {
     }
   }
 
-  static async getShowtime({ date, time, movieId }) {
+  static async getShowtime({ date, time, movieId, theaterId }) {
     try {
-      const foundShowtime = await findShowtime({ date, time, movieId });
+      const foundShowtime = await findShowtime({
+        date,
+        time,
+        movieId,
+        theaterId,
+      });
       if (!foundShowtime) {
         throw new BadRequestError("Showtime not found");
       }
